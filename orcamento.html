@@ -47,7 +47,6 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            margin-bottom: 40px; /* Aumentar espaço entre tabela e informações adicionais */
         }
 
         th, td {
@@ -61,9 +60,14 @@
             color: white;
         }
 
+        /* Adicionado espaço entre a tabela e a seção de pagamento */
+        .espaco-tabela {
+            height: 20px; /* Ajuste conforme necessário */
+        }
+
         .conditions {
             margin-top: 40px; /* Espaço maior entre a tabela e as observações */
-            font-size: 0.9em; /* Ajustar tamanho da fonte */
+            font-size: 0.9em;
             color: #555;
         }
 
@@ -83,11 +87,6 @@
             margin-top: 20px;
             margin-bottom: 20px;
         }
-
-        /* Adicionado para dar espaco entre a tabela e as informações de pagamento */
-        .espaco-tabela {
-            height: 20px; /* Ajuste este valor conforme necessário */
-        }
     </style>
 </head>
 <body>
@@ -100,9 +99,9 @@
     <div id="conteudo-orcamento">
         <!-- O conteúdo do orçamento será inserido aqui pelo JavaScript -->
     </div>
-    <!-- Informações Adicionais -->
+    <!-- Observações -->
     <div class="conditions">
-        <p><strong>Informações Adicionais:</strong></p>
+        <p><strong>Observações:</strong></p>
         <ol>
             <li>Trabalhamos com enxoval personalizado com bordado computadorizado.</li>
             <li>Para o envio da arte, somente após a confirmação do pagamento. Entrada de 50% do valor total.</li>
@@ -113,7 +112,7 @@
             <li>Entregamos com taxa.</li>
         </ol>
     </div>
-    <!-- Fim das Informações Adicionais -->
+    <!-- Fim das Observações -->
     <div class="footer">
         <div class="separator"></div>
         <p>Pérola Rara - Fraldas Personalizadas</p>
