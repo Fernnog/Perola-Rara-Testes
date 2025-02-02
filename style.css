@@ -1,6 +1,4 @@
-/* ==== INÍCIO SEÇÃO - GOOGLE FONTS ==== */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-/* ==== FIM SEÇÃO - GOOGLE FONTS ==== */
+/* OBS: A importação do Google Fonts deve ser feita via <link> no HTML */
 
 /* ==== INÍCIO SEÇÃO - ESTILOS GERAIS ==== */
 body {
@@ -49,32 +47,33 @@ hr.final-tabela {
 }
 /* ==== FIM SEÇÃO - ESTILOS GERAIS ==== */
 
-/* ==== INÍCIO SEÇÃO - CABEÇALHO (PÁGINA PRINCIPAL) ==== */
+
+/* ==== INÍCIO SEÇÃO - CABEÇALHO ==== */
 .top-bar {
-    display: flex; /* Ativa o flexbox */
-    justify-content: flex-end; /* Alinha o painel à direita */
-    padding: 10px 20px; /* Espaçamento interno na barra superior */
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 20px;
 }
 
 header {
     text-align: center;
     padding: 20px 0;
-    background-color: #ffffff; /* Cor de fundo alterada para branco */
-    color: #7aa2a9; /* Cor do texto alterada para a paleta */
+    background-color: #ffffff;
+    color: #7aa2a9;
     margin-bottom: 20px;
 }
 
 .logo-container {
-    margin-top: 20px; /* Espaço entre o painel e o logo */
-    margin-bottom: 10px; /* Espaço entre o painel e o logo */
-    text-align: center; /* Centraliza o logo horizontalmente */
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-align: center;
 }
 
-#logo {
+.logo {
     max-width: 150px;
     height: auto;
     display: block;
-    margin: 0 auto; /* Centraliza o logo horizontalmente e espaçamento*/
+    margin: 0 auto;
 }
 
 h1, h2 {
@@ -98,18 +97,20 @@ nav ul li a {
     color: #7aa2a9;
     text-decoration: none;
 }
-/* ==== FIM SEÇÃO - CABEÇALHO (PÁGINA PRINCIPAL) ==== */
+/* ==== FIM SEÇÃO - CABEÇALHO ==== */
+
 
 /* ==== INÍCIO SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
 .ultimo-backup {
-    font-size: 0.8em; /* Tamanho da fonte menor para não chamar muita atenção */
-    color: #666; /* Cor cinza, menos proeminente que o texto principal */
-    padding: 5px 10px; /* Espaçamento interno para o texto respirar */
-    border: 1px solid #ccc; /* Borda fina e cinza clara */
-    border-radius: 5px; /* Cantos arredondados para um visual mais suave */
-    background-color: #f5f5f5; /* Fundo cinza claro, levemente diferente do fundo da página */
+    font-size: 0.8em; /* Fonte menor para não chamar muita atenção */
+    color: #666;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f5f5f5;
 }
 /* ==== FIM SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
+
 
 /* ==== INÍCIO SEÇÃO - FORMULÁRIO ==== */
 #form-orcamento, #form-edicao-pedido {
@@ -126,19 +127,18 @@ label {
     font-weight: bold;
 }
 
-/* Estilos para todos os campos de texto, incluindo o novo campo de e-mail */
 input[type="text"],
 input[type="number"],
 input[type="date"],
-input[type="email"], /* Adicionado o seletor para o campo de e-mail */
+input[type="email"],
 textarea {
     width: calc(100% - 22px);
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 20px; /* Bordas arredondadas */
+    border-radius: 20px;
     font-size: 16px;
-    background-color: #dfb6b0; /* Cor de fundo dos campos */
-    color: #fff; /* Cor do texto nos campos */
+    background-color: #dfb6b0;
+    color: #fff;
 }
 
 .form-row:after {
@@ -162,6 +162,7 @@ input[type="checkbox"] {
 }
 /* ==== FIM SEÇÃO - FORMULÁRIO ==== */
 
+
 /* ==== INÍCIO SEÇÃO - TABELAS ==== */
 table {
     width: 100%;
@@ -180,10 +181,38 @@ th {
     color: white;
 }
 
+/* Tabela de relatório */
+.relatorio-table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+.relatorio-table th,
+.relatorio-table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+}
+
+.relatorio-table th {
+    background-color: #cce5e9; /* Cabeçalho com tom mais claro */
+    color: #333;
+}
+
+.relatorio-table tr:nth-child(even) {
+    background-color: #f0f8fa;
+}
+
+.relatorio-table tr:nth-child(odd) {
+    background-color: #f8f8f8;
+}
+
 .table-responsive {
     overflow-x: auto;
 }
 /* ==== FIM SEÇÃO - TABELAS ==== */
+
 
 /* ==== INÍCIO SEÇÃO - BOTÕES ==== */
 button {
@@ -191,7 +220,7 @@ button {
     color: white;
     padding: 10px 20px;
     border: none;
-    border-radius: 20px; /* Bordas arredondadas */
+    border-radius: 20px;
     font-size: 16px;
     cursor: pointer;
     margin-top: 10px;
@@ -201,26 +230,15 @@ button:hover {
     background-color: #5a8289;
 }
 
-/* ==== INÍCIO SEÇÃO - BOTÃO VOLTAR AO INÍCIO ==== */
+/* Botão voltar ao início */
 #lista-pedidos button, #relatorio button, #backup button {
     display: block;
     margin: 0 auto 20px auto;
 }
-/* ==== FIM SEÇÃO - BOTÃO VOLTAR AO INÍCIO ==== */
-
 /* ==== FIM SEÇÃO - BOTÕES ==== */
 
-/* ==== INÍCIO SEÇÃO - SEÇÃO RELATÓRIO ==== */
-.filtro-data {
-    margin-bottom: 20px;
-}
 
-.filtro-data label, .filtro-data input {
-    margin-right: 10px;
-}
-/* ==== FIM SEÇÃO - SEÇÃO RELATÓRIO ==== */
-
-/* ==== INÍCIO SEÇÃO - FILTROS ==== */
+/* ==== INÍCIO SEÇÃO - RELATÓRIO E FILTROS ==== */
 .filtro-data {
     margin-bottom: 20px;
     text-align: center;
@@ -231,9 +249,10 @@ button:hover {
 .filtro-data button {
     margin: 0 5px;
 }
-/* ==== FIM SEÇÃO - FILTROS ==== */
+/* ==== FIM SEÇÃO - RELATÓRIO E FILTROS ==== */
 
-/* ==== INÍCIO SEÇÃO - PÁGINA DE VISUALIZAÇÃO DO ORÇAMENTO (orcamento.html) ==== */
+
+/* ==== INÍCIO SEÇÃO - VISUALIZAÇÃO DO ORÇAMENTO (orcamento.html) ==== */
 .header-orcamento {
     text-align: center;
     margin-bottom: 20px;
@@ -253,21 +272,23 @@ button:hover {
     text-align: left;
     margin-bottom: 10px;
 }
-/* ==== FIM SEÇÃO - PÁGINA DE VISUALIZAÇÃO DO ORÇAMENTO (orcamento.html) ==== */
+/* ==== FIM SEÇÃO - VISUALIZAÇÃO DO ORÇAMENTO ==== */
+
 
 /* ==== INÍCIO SEÇÃO - BOTÃO LIMPAR PÁGINA ==== */
 nav ul li a[onclick="limparPagina()"] {
-    background-color: #dfb6b0; /* Fundo rosa delicado */
-    padding: 5px 10px; /* Espaçamento interno */
-    border-radius: 10px; /* Bordas arredondadas */
-    color: white; /* Texto branco para contraste */
-    margin-left: 20px; /* Espaço à esquerda para separar dos outros botões */
+    background-color: #dfb6b0;
+    padding: 5px 10px;
+    border-radius: 10px;
+    color: white;
+    margin-left: 20px;
 }
 
 nav ul li a[onclick="limparPagina()"]:hover {
-    background-color: #c89790; /* Tom mais escuro de rosa no hover */
+    background-color: #c89790;
 }
 /* ==== FIM SEÇÃO - BOTÃO LIMPAR PÁGINA ==== */
+
 
 /* ==== INÍCIO SEÇÃO - MEDIA QUERIES ==== */
 @media (max-width: 768px) {
