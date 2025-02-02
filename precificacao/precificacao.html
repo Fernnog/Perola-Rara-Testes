@@ -1,1 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pérola Rara - Precificação</title>
+    <link rel="stylesheet" href="precificacao.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="../logo_perola_rara.png" alt="Logo Pérola Rara" id="logo">
+            </div>
+            <h1>Pérola Rara</h1>
+            <hr class="titulo">
+            <nav>
+                <ul>
+                    <li><a href="../index.html">Voltar ao Início</a></li>
+                    <li><a href="#" onclick="mostrarSubMenu('materiais')">Materiais</a></li>
+                    <li><a href="#" onclick="mostrarSubMenu('insumos')">Insumos</a></li>
+                    <li><a href="#" class="custos-gerais-menu">Custos Gerais</a>
+                        <ul class="submenu">
+                            <li><a href="#" onclick="mostrarSubMenu('mao-de-obra')">Mão de Obra</a></li>
+                            <li><a href="#" onclick="mostrarSubMenu('equipamentos')">Equipamentos e Ferramentas</a></li>
+                            <li><a href="#" onclick="mostrarSubMenu('custos-indiretos')">Custos Indiretos</a></li>
+                            <li><a href="#" onclick="mostrarSubMenu('despesas')">Despesas Administrativas/Comerciais</a></li>
+                            <li><a href="#" onclick="mostrarSubMenu('impostos')">Impostos Diversos</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#" onclick="mostrarSubMenu('calculo-precificacao')">Cálculo da Precificação</a></li>
+                </ul>
+            </nav>
+            <hr class="menu">
+        </header>
 
+        <section id="conteudo-precificacao">
+            <!-- O conteúdo das subpáginas será carregado aqui -->
+        </section>
+    </div>
+
+    <script src="precificacao.js"></script>
+</body>
+</html>
