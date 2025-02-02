@@ -500,7 +500,7 @@ function gerarPedido(numeroOrcamento) {
             ...p,
             valorTotal: p.quantidade * p.valorUnit
         })),
-        observacoes: '' // Limpa as observações do orçamento
+        observacoes: orcamento.observacoes // COPIANDO OBSERVAÇÕES DO ORÇAMENTO PARA O PEDIDO
     };
 
     delete pedido.dataValidade;
@@ -628,10 +628,7 @@ function editarPedido(numeroPedido) {
         cellAcoes.innerHTML = '<button type="button" onclick="excluirProdutoEdicao(this)">Excluir</button>';
     });
 
-    // Preencher checkboxes de entrega e pagamento (com verificação de existência)
-    const entregaCheckboxes = document.querySelectorAll('input[name="entregaEdicao"]');
-    entregaCheckboxes.forEach(el => el.checked = pedido.entrega && pedido.entrega.includes(el.value));
-
+    // Preencher checkboxes de pagamento (com verificação de existência)
     const pagamentoCheckboxes = document.querySelectorAll('input[name="pagamentoEdicao"]');
     pagamentoCheckboxes.forEach(el => el.checked = pedido.pagamento && pedido.pagamento.includes(el.value));
 
@@ -640,7 +637,8 @@ function editarPedido(numeroPedido) {
 }
 
 function atualizarPedido() {
-    const numeroPedido = document.querySelector("#tabela-pedidos tbody tr:focus-within td:first-child").textContent;
+    // CORRIGINDO OBTENÇÃO DO NÚMERO DO PEDIDO
+    const numeroPedido = document.getElementById("tabela-pedidos").querySelector('tbody tr td:first-child').textContent;
     const pedidoIndex = pedidos.findIndex(p => p.numero === numeroPedido);
 
     if (pedidoIndex === -1) {
@@ -649,6 +647,7 @@ function atualizarPedido() {
     }
 
     const pedidoAtualizado = {
+        // ADICIONANDO O NÚMERO DO PEDIDO
         numero: numeroPedido,
         dataPedido: document.getElementById("dataPedidoEdicao").value,
         dataEntrega: document.getElementById("dataEntregaEdicao").value,
@@ -656,10 +655,11 @@ function atualizarPedido() {
         endereco: document.getElementById("enderecoEdicao").value,
         tema: document.getElementById("temaEdicao").value,
         cidade: document.getElementById("cidadeEdicao").value,
-        contato: document.getElementById("contatoEdicao").value,
+        // CORRIGINDO NOME DO CAMPO (ERA contatoEdicao)
+        telefone: document.getElementById("contatoEdicao").value,
         cores: document.getElementById("coresEdicao").value,
         produtos: [],
-        entrega: Array.from(document.querySelectorAll('input[name="entregaEdicao"]:checked')).map(el => el.value),
+        // REMOVENDO O CAMPO entrega
         pagamento: Array.from(document.querySelectorAll('input[name="pagamentoEdicao"]:checked')).map(el => el.value),
         valorFrete: converterMoedaParaNumero(document.getElementById("valorFreteEdicao").value),
         valorPedido: converterMoedaParaNumero(document.getElementById("valorPedidoEdicao").value),
@@ -680,6 +680,7 @@ function atualizarPedido() {
         });
     });
 
+    // ATUALIZANDO O PEDIDO NA LISTA
     pedidos[pedidoIndex] = pedidoAtualizado;
 
     exportarDados();
@@ -689,6 +690,7 @@ function atualizarPedido() {
     mostrarPagina('lista-pedidos');
     mostrarPedidosRealizados();
 }
+
 /* ==== FIM SEÇÃO - PEDIDOS REALIZADOS ==== */
 
 /* ==== INÍCIO SEÇÃO - RELATÓRIO ==== */
@@ -697,14 +699,17 @@ function filtrarPedidosRelatorio() {
     const dataFim = document.getElementById('filtroDataFim').value;
 
     const pedidosFiltrados = pedidos.filter(pedido => {
-        return pedido.dataPedido >= dataInicio && pedido.dataPedido <= dataFim;
+        const dataPedido = new Date(pedido.dataPedido);
+        const inicio = dataInicio ? new Date(dataInicio) : new Date('1970-01-01'); // Data mínima
+        const fim = dataFim ? new Date(dataFim) : new Date('2100-01-01'); // Data máxima
+
+        return dataPedido >= inicio && dataPedido <= fim;
     });
 
     gerarRelatorio(pedidosFiltrados);
 }
 
 function gerarRelatorio(pedidosFiltrados) {
-    let relatorio = '';
     let totalPedidos = 0;
     let totalFrete = 0;
     let totalLucro = 0;
@@ -715,25 +720,44 @@ function gerarRelatorio(pedidosFiltrados) {
         totalLucro += pedido.lucro;
     });
 
-    relatorio += `<p>Total de Pedidos: ${formatarMoeda(totalPedidos)}</p>`;
-    relatorio += `<p>Total de Frete: ${formatarMoeda(totalFrete)}</p>`;
-    relatorio += `<p>Total de Lucro: ${formatarMoeda(totalLucro)}</p>`;
+    const quantidadePedidos = pedidosFiltrados.length;
 
-    document.getElementById('relatorio-conteudo').innerHTML = relatorio;
+    const relatorioHTML = `
+        <table class="relatorio-table">
+            <thead>
+                <tr>
+                    <th>Total de Pedidos</th>
+                    <th>Total de Frete</th>
+                    <th>Total de Lucro</th>
+                    <th>Quantidade de Pedidos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${formatarMoeda(totalPedidos)}</td>
+                    <td>${formatarMoeda(totalFrete)}</td>
+                    <td>${formatarMoeda(totalLucro)}</td>
+                    <td>${quantidadePedidos}</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+
+    document.getElementById('relatorio-conteudo').innerHTML = relatorioHTML;
 }
 
-function gerarRelatorioCSV() {
-    let csv = 'Número do Pedido,Data do Pedido,Cliente,Total,Frete,Lucro\n';
+function gerarRelatorioXLSX() {
+    // Criar uma nova pasta de trabalho
+    const wb = XLSX.utils.book_new();
 
-    pedidos.forEach(pedido => {
-        csv += `${pedido.numero},${pedido.dataPedido},${pedido.cliente},${pedido.total},${pedido.valorFrete},${pedido.lucro}\n`;
-    });
+    // Criar uma nova planilha
+    const ws = XLSX.utils.table_to_sheet(document.querySelector('.relatorio-table'));
 
-    const hiddenElement = document.createElement('a');
-    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-    hiddenElement.target = '_blank';
-    hiddenElement.download = 'relatorio_pedidos.csv';
-    hiddenElement.click();
+    // Adicionar a planilha à pasta de trabalho
+    XLSX.utils.book_append_sheet(wb, ws, "Relatorio");
+
+    // Gerar o arquivo XLSX e iniciar o download
+    XLSX.writeFile(wb, "relatorio_pedidos.xlsx");
 }
 /* ==== FIM SEÇÃO - RELATÓRIO ==== */
 
@@ -879,4 +903,3 @@ function limparPagina() {
     }
 }
 /* ==== FIM SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
-
