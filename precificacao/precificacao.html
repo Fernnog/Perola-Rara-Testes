@@ -36,7 +36,280 @@
         </header>
 
         <section id="conteudo-precificacao">
-            <!-- O conteúdo das subpáginas será carregado aqui -->
+
+            <!-- Subpágina Materiais -->
+            <section id="materiais" class="subpagina">
+                <h2>Materiais</h2>
+                <form id="form-materiais">
+                    <div class="form-group">
+                        <label for="nome-material">Nome do Material:</label>
+                        <input type="text" id="nome-material" name="nome-material">
+                    </div>
+                    <div class="form-group">
+                        <label for="unidade-medida-material">Unidade de Medida:</label>
+                        <select id="unidade-medida-material" name="unidade-medida-material">
+                            <option value="metro">Metro</option>
+                            <option value="litro">Litro</option>
+                            <option value="quilo">Quilo</option>
+                            <option value="unidade">Unidade</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="valor-total-material">Valor Total (R$):</label>
+                        <input type="number" id="valor-total-material" name="valor-total-material" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="quantidade-material">Quantidade:</label>
+                        <input type="number" id="quantidade-material" name="quantidade-material" step="0.01">
+                    </div>
+                    <button type="button" onclick="cadastrarMaterial()">Cadastrar Material</button>
+                </form>
+
+                <table id="tabela-materiais">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Unidade de Medida</th>
+                            <th>Custo Unitário (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Subpágina Insumos -->
+            <section id="insumos" class="subpagina" style="display: none;">
+                <h2>Insumos</h2>
+                <form id="form-insumos">
+                    <div class="form-group">
+                        <label for="nome-insumo">Nome do Insumo:</label>
+                        <input type="text" id="nome-insumo" name="nome-insumo">
+                    </div>
+                    <div class="form-group">
+                        <label for="unidade-medida-insumo">Unidade de Medida:</label>
+                        <select id="unidade-medida-insumo" name="unidade-medida-insumo">
+                            <option value="metro">Metro</option>
+                            <option value="litro">Litro</option>
+                            <option value="quilo">Quilo</option>
+                            <option value="unidade">Unidade</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="valor-total-insumo">Valor Total (R$):</label>
+                        <input type="number" id="valor-total-insumo" name="valor-total-insumo" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="quantidade-insumo">Quantidade:</label>
+                        <input type="number" id="quantidade-insumo" name="quantidade-insumo" step="0.01">
+                    </div>
+                    <button type="button" onclick="cadastrarInsumo()">Cadastrar Insumo</button>
+                </form>
+
+                <table id="tabela-insumos">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Unidade de Medida</th>
+                            <th>Custo Unitário (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Subpágina Mão de Obra -->
+            <section id="mao-de-obra" class="subpagina" style="display: none;">
+                <h2>Mão de Obra</h2>
+                <form id="form-mao-de-obra">
+                    <div class="form-group">
+                        <label for="horas-trabalhadas">Horas Trabalhadas:</label>
+                        <input type="number" id="horas-trabalhadas" name="horas-trabalhadas" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="valor-hora">Valor da Hora (R$):</label>
+                        <input type="number" id="valor-hora" name="valor-hora" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="percentual-encargos">Percentual de Encargos (%):</label>
+                        <input type="number" id="percentual-encargos" name="percentual-encargos" step="0.01">
+                    </div>
+                    <button type="button" onclick="cadastrarMaoDeObra()">Cadastrar</button>
+                </form>
+                <table id="tabela-mao-de-obra">
+                    <thead>
+                        <tr>
+                            <th>Horas Trabalhadas</th>
+                            <th>Valor da Hora (R$)</th>
+                            <th>Custo Total (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Subpágina Equipamentos e Ferramentas -->
+            <section id="equipamentos" class="subpagina" style="display: none;">
+                <h2>Equipamentos e Ferramentas</h2>
+                <form id="form-equipamentos">
+                    <div class="form-group">
+                        <label for="nome-equipamento">Nome do Equipamento:</label>
+                        <input type="text" id="nome-equipamento" name="nome-equipamento">
+                    </div>
+                    <div class="form-group">
+                        <label for="valor-equipamento">Valor do Equipamento (R$):</label>
+                        <input type="number" id="valor-equipamento" name="valor-equipamento" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="vida-util-equipamento">Vida Útil (em unidades produzidas):</label>
+                        <input type="number" id="vida-util-equipamento" name="vida-util-equipamento">
+                    </div>
+                    <button type="button" onclick="cadastrarEquipamento()">Cadastrar Equipamento</button>
+                </form>
+
+                <table id="tabela-equipamentos">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Valor (R$)</th>
+                            <th>Vida Útil (unidades)</th>
+                            <th>Depreciação por Unidade (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Subpágina Custos Indiretos -->
+            <section id="custos-indiretos" class="subpagina" style="display: none;">
+                <h2>Custos Indiretos</h2>
+                <form id="form-custos-indiretos">
+                    <div class="form-group">
+                        <label for="descricao-custo-indireto">Descrição:</label>
+                        <input type="text" id="descricao-custo-indireto" name="descricao-custo-indireto">
+                    </div>
+                    <div class="form-group">
+                        <label for="valor-custo-indireto">Valor Mensal (R$):</label>
+                        <input type="number" id="valor-custo-indireto" name="valor-custo-indireto" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="unidades-produzidas">Unidades Produzidas (mês):</label>
+                        <input type="number" id="unidades-produzidas" name="unidades-produzidas">
+                    </div>
+                    <button type="button" onclick="cadastrarCustoIndireto()">Cadastrar</button>
+                </form>
+
+                <table id="tabela-custos-indiretos">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor Mensal (R$)</th>
+                            <th>Unidades Produzidas (mês)</th>
+                            <th>Custo Indireto por Unidade (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Subpágina Despesas Administrativas/Comerciais -->
+            <section id="despesas" class="subpagina" style="display: none;">
+                <h2>Despesas Administrativas/Comerciais</h2>
+                <form id="form-despesas">
+                    <div class="form-group">
+                        <label for="descricao-despesa">Descrição:</label>
+                        <input type="text" id="descricao-despesa" name="descricao-despesa">
+                    </div>
+                    <div class="form-group">
+                        <label for="valor-despesa">Valor Mensal (R$):</label>
+                        <input type="number" id="valor-despesa" name="valor-despesa" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="unidades-produzidas-despesas">Unidades Produzidas (mês):</label>
+                        <input type="number" id="unidades-produzidas-despesas" name="unidades-produzidas-despesas">
+                    </div>
+                    <button type="button" onclick="cadastrarDespesa()">Cadastrar</button>
+                </form>
+
+                <table id="tabela-despesas">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor Mensal (R$)</th>
+                            <th>Unidades Produzidas (mês)</th>
+                            <th>Custo por Unidade (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Subpágina Impostos Diversos -->
+            <section id="impostos" class="subpagina" style="display: none;">
+                <h2>Impostos Diversos</h2>
+                <form id="form-impostos">
+                    <div class="form-group">
+                        <label for="descricao-imposto">Descrição:</label>
+                        <input type="text" id="descricao-imposto" name="descricao-imposto">
+                    </div>
+                    <div class="form-group">
+                        <label for="percentual-imposto">Percentual (%):</label>
+                        <input type="number" id="percentual-imposto" name="percentual-imposto" step="0.01">
+                    </div>
+                    <button type="button" onclick="cadastrarImposto()">Cadastrar</button>
+                </form>
+
+                <table id="tabela-impostos">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Percentual (%)</th>
+                            <th>Valor do Imposto (R$) (Calculado na Precificação)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Subpágina Cálculo da Precificação -->
+            <section id="calculo-precificacao" class="subpagina" style="display: none;">
+                <h2>Cálculo da Precificação</h2>
+                
+                <form id="form-calculo-precificacao">
+                    <div class="form-group">
+                        <label for="nome-produto">Nome do Produto:</label>
+                        <input type="text" id="nome-produto" name="nome-produto">
+                    </div>
+                    <button type="button" onclick="adicionarProdutoCalculo()">Adicionar Produto</button>
+                </form>
+
+                <table id="tabela-calculo-precificacao">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Materiais (R$)</th>
+                            <th>Insumos (R$)</th>
+                            <th>Mão de Obra (R$)</th>
+                            <th>Equipamentos (R$)</th>
+                            <th>Custos Indiretos (R$)</th>
+                            <th>Despesas (R$)</th>
+                            <th>Impostos (R$)</th>
+                            <th>Custo Total (R$)</th>
+                            <th>Margem de Lucro (%)</th>
+                            <th>Preço de Venda (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Linhas da tabela serão adicionadas via JavaScript -->
+                    </tbody>
+                </table>
+            </section>
         </section>
     </div>
 
