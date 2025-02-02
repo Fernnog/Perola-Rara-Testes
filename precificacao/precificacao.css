@@ -143,7 +143,7 @@ nav ul li ul.submenu li a:hover {
 /* ==== FIM SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
 
 /* ==== INÍCIO SEÇÃO - FORMULÁRIO ==== */
-#form-orcamento, #form-edicao-pedido {
+.subpagina form {
     margin-bottom: 30px;
 }
 
@@ -162,6 +162,7 @@ input[type="text"],
 input[type="number"],
 input[type="date"],
 input[type="email"], /* Adicionado o seletor para o campo de e-mail */
+select,
 textarea {
     width: calc(100% - 22px);
     padding: 10px;
@@ -326,6 +327,95 @@ nav ul li a[onclick="limparPagina()"]:hover {
     background-color: #c89790; /* Tom mais escuro de rosa no hover */
 }
 /* ==== FIM SEÇÃO - BOTÃO LIMPAR PÁGINA ==== */
+
+/* ==== INÍCIO SEÇÃO - NOVOS ESTILOS PARA A PÁGINA DE PRECIFICAÇÃO ==== */
+.subpagina {
+    margin-top: 20px;
+}
+
+.subpagina h2 {
+    color: #7aa2a9;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.subpagina table {
+    width: 95%;
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+.subpagina th {
+    background-color: #dfb6b0;
+    color: white;
+    text-align: left;
+    padding: 10px;
+}
+
+.subpagina td {
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.subpagina form {
+    width: 95%;
+    margin: auto;
+    margin-bottom: 30px;
+}
+
+.subpagina .form-group {
+    margin-bottom: 15px;
+}
+
+.subpagina label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.subpagina input[type="text"],
+.subpagina input[type="number"],
+.subpagina select {
+    width: calc(100% - 22px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 16px;
+    background-color: #dfb6b0;
+    color: #fff;
+}
+
+.subpagina button {
+    background-color: #7aa2a9;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.subpagina button:hover {
+    background-color: #5a8289;
+}
+
+/* Estilos específicos para a tabela de cálculo de precificação */
+#tabela-calculo-precificacao td[contenteditable="true"] {
+    background-color: #dfb6b0;
+    color: #fff;
+    cursor: pointer;
+}
+
+#tabela-calculo-precificacao td[contenteditable="true"]:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+#tabela-calculo-precificacao td:last-child {
+    font-weight: bold;
+}
+/* ==== FIM SEÇÃO - NOVOS ESTILOS PARA A PÁGINA DE PRECIFICAÇÃO ==== */
 
 /* ==== INÍCIO SEÇÃO - MEDIA QUERIES ==== */
 @media (max-width: 768px) {
