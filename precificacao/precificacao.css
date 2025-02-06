@@ -1,11 +1,8 @@
-/* ==== INÍCIO SEÇÃO - GOOGLE FONTS ==== */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-/* ==== FIM SEÇÃO - GOOGLE FONTS ==== */
 
-/* ==== INÍCIO SEÇÃO - ESTILOS GERAIS ==== */
 body {
     font-family: 'Roboto', Arial, sans-serif;
-    background-color: #ffffff; /* Fundo branco */
+    background-color: #ffffff;
     color: #333;
     margin: 0;
     padding: 0;
@@ -30,51 +27,25 @@ hr.menu {
     margin-bottom: 20px;
 }
 
-hr.subtitulo {
-    border: 1px solid #ccc;
-    margin-top: 10px;
-    margin-bottom: 20px;
-}
-
-hr.tabela {
-    border: 1px solid #ccc;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-hr.final-tabela {
-    border: 1px solid #ccc;
-    margin-top: 10px;
-    margin-bottom: 20px;
-}
-/* ==== FIM SEÇÃO - ESTILOS GERAIS ==== */
-
-/* ==== INÍCIO SEÇÃO - CABEÇALHO (PÁGINA PRINCIPAL) ==== */
-.top-bar {
-    display: flex; /* Ativa o flexbox */
-    justify-content: flex-end; /* Alinha o painel à direita */
-    padding: 10px 20px; /* Espaçamento interno na barra superior */
-}
-
 header {
     text-align: center;
     padding: 20px 0;
-    background-color: #ffffff; /* Cor de fundo alterada para branco */
-    color: #7aa2a9; /* Cor do texto alterada para a paleta */
+    background-color: #ffffff;
+    color: #7aa2a9;
     margin-bottom: 20px;
 }
 
 .logo-container {
-    margin-top: 20px; /* Espaço entre o painel e o logo */
-    margin-bottom: 10px; /* Espaço entre o painel e o logo */
-    text-align: center; /* Centraliza o logo horizontalmente */
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-align: center;
 }
 
 #logo {
     max-width: 150px;
     height: auto;
     display: block;
-    margin: 0 auto; /* Centraliza o logo horizontalmente e espaçamento*/
+    margin: 0 auto;
 }
 
 h1, h2 {
@@ -92,7 +63,7 @@ nav ul {
 nav ul li {
     display: inline-block;
     margin: 0 10px;
-    position: relative; /* Para posicionar o submenu */
+    position: relative;
 }
 
 nav ul li a {
@@ -100,50 +71,33 @@ nav ul li a {
     text-decoration: none;
     display: block;
     padding: 10px;
+    transition: background-color 0.3s ease; /* Adiciona transição suave no hover */
 }
 
-/* Submenu */
-nav ul li ul.submenu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #fff;
-    border: 1px solid #7aa2a9;
-    z-index: 10;
+nav ul li:hover > a { /* Aplica o hover apenas ao link do item pai */
+    background-color: #e8d7d4;
 }
 
-nav ul li:hover ul.submenu {
-    display: block;
+.subpagina {
+    margin-top: 20px;
 }
 
-nav ul li ul.submenu li {
-    width: 200px;
-}
-
-nav ul li ul.submenu li a {
-    padding: 10px 15px;
+/* Estilo unificado para h2 e h3 dentro de subpagina - ALTERADO AQUI */
+.subpagina h2, .subpagina h3 {
     color: #7aa2a9;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5em; /* ou outro tamanho que você achar adequado */
 }
 
-nav ul li ul.submenu li a:hover {
-    background-color: #f0f0f0;
+/* Espaçamento superior aumentado para o h3 específico - ADICIONADO AQUI */
+#titulo-ferias-13o {
+   margin-top: 30px; /* Ajuste este valor conforme necessário */
 }
-/* ==== FIM SEÇÃO - CABEÇALHO (PÁGINA PRINCIPAL) ==== */
 
-/* ==== INÍCIO SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
-.ultimo-backup {
-    font-size: 0.8em; /* Tamanho da fonte menor para não chamar muita atenção */
-    color: #666; /* Cor cinza, menos proeminente que o texto principal */
-    padding: 5px 10px; /* Espaçamento interno para o texto respirar */
-    border: 1px solid #ccc; /* Borda fina e cinza clara */
-    border-radius: 5px; /* Cantos arredondados para um visual mais suave */
-    background-color: #f5f5f5; /* Fundo cinza claro, levemente diferente do fundo da página */
-}
-/* ==== FIM SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
-
-/* ==== INÍCIO SEÇÃO - FORMULÁRIO ==== */
 .subpagina form {
+    width: 95%;
+    margin: auto;
     margin-bottom: 30px;
 }
 
@@ -157,44 +111,34 @@ label {
     font-weight: bold;
 }
 
-/* Estilos para todos os campos de texto, incluindo o novo campo de e-mail */
 input[type="text"],
 input[type="number"],
-input[type="date"],
-input[type="email"], /* Adicionado o seletor para o campo de e-mail */
 select,
 textarea {
     width: calc(100% - 22px);
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 20px; /* Bordas arredondadas */
+    border-radius: 20px;
     font-size: 16px;
-    background-color: #dfb6b0; /* Cor de fundo dos campos */
-    color: #fff; /* Cor do texto nos campos */
+    background-color: #dfb6b0;
+    color: #fff;
 }
 
-.form-row:after {
-    content: "";
-    display: table;
-    clear: both;
+button {
+    background-color: #7aa2a9;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
-.form-row .form-group {
-    float: left;
-    width: 48%;
-    margin-right: 2%;
+button:hover {
+    background-color: #5a8289;
 }
 
-.form-row .form-group:last-child {
-    margin-right: 0;
-}
-
-input[type="checkbox"] {
-    margin-right: 5px;
-}
-/* ==== FIM SEÇÃO - FORMULÁRIO ==== */
-
-/* ==== INÍCIO SEÇÃO - TABELAS ==== */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -207,223 +151,47 @@ th, td {
     border: 1px solid #ccc;
 }
 
+/* Títulos das tabelas (cabeçalho) */
 th {
-    background-color: #dfb6b0;
-    color: white;
+    background-color: #cae6e7; /* Cor azul para os títulos */
+    color: #333; /* Cor do texto mais escura para melhor contraste */
 }
 
-/* Novas classes para a tabela de relatório */
-.relatorio-table {
-    width: 80%;
-    margin: 20px auto;
+td {
+    background-color: #fff; /* Fundo branco para as células de dados */
+}
+
+/* Estilos para tabelas dinâmicas */
+.tabela-gerada {
+    width: 100%;
     border-collapse: collapse;
-}
-
-.relatorio-table th,
-.relatorio-table td {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ccc;
-}
-
-.relatorio-table th {
-    background-color: #cce5e9; /* Cor mais clara da paleta para o cabeçalho (25% mais claro que #7aa2a9) */
-    color: #333;
-}
-
-.relatorio-table tr:nth-child(even) {
-    background-color: #f0f8fa; /* Cor mais clara da paleta para linhas pares (25% mais claro que #dfb6b0) */
-}
-
-.relatorio-table tr:nth-child(odd) {
-    background-color: #f8f8f8; /* Fundo branco para linhas ímpares */
-}
-
-.table-responsive {
-    overflow-x: auto;
-}
-/* ==== FIM SEÇÃO - TABELAS ==== */
-
-/* ==== INÍCIO SEÇÃO - BOTÕES ==== */
-button {
-    background-color: #7aa2a9;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px; /* Bordas arredondadas */
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-button:hover {
-    background-color: #5a8289;
-}
-
-/* ==== INÍCIO SEÇÃO - BOTÃO VOLTAR AO INÍCIO ==== */
-#lista-pedidos button, #relatorio button, #backup button {
-    display: block;
-    margin: 0 auto 20px auto;
-}
-/* ==== FIM SEÇÃO - BOTÃO VOLTAR AO INÍCIO ==== */
-
-/* ==== FIM SEÇÃO - BOTÕES ==== */
-
-/* ==== INÍCIO SEÇÃO - SEÇÃO RELATÓRIO ==== */
-.filtro-data {
-    margin-bottom: 20px;
-}
-
-.filtro-data label, .filtro-data input {
-    margin-right: 10px;
-}
-/* ==== FIM SEÇÃO - SEÇÃO RELATÓRIO ==== */
-
-/* ==== INÍCIO SEÇÃO - FILTROS ==== */
-.filtro-data {
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.filtro-data label,
-.filtro-data input,
-.filtro-data button {
-    margin: 0 5px;
-}
-/* ==== FIM SEÇÃO - FILTROS ==== */
-
-/* ==== INÍCIO SEÇÃO - PÁGINA DE VISUALIZAÇÃO DO ORÇAMENTO (orcamento.html) ==== */
-.header-orcamento {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-#logo-orcamento {
-    max-width: 100px;
-    height: auto;
-}
-
-.contato-empresa {
-    margin: 5px 0;
-    font-size: 0.9em;
-}
-
-.info-orcamento {
-    text-align: left;
-    margin-bottom: 10px;
-}
-/* ==== FIM SEÇÃO - PÁGINA DE VISUALIZAÇÃO DO ORÇAMENTO (orcamento.html) ==== */
-
-/* ==== INÍCIO SEÇÃO - BOTÃO LIMPAR PÁGINA ==== */
-nav ul li a[onclick="limparPagina()"] {
-    background-color: #dfb6b0; /* Fundo rosa delicado */
-    padding: 5px 10px; /* Espaçamento interno */
-    border-radius: 10px; /* Bordas arredondadas */
-    color: white; /* Texto branco para contraste */
-    margin-left: 20px; /* Espaço à esquerda para separar dos outros botões */
-}
-
-nav ul li a[onclick="limparPagina()"]:hover {
-    background-color: #c89790; /* Tom mais escuro de rosa no hover */
-}
-/* ==== FIM SEÇÃO - BOTÃO LIMPAR PÁGINA ==== */
-
-/* ==== INÍCIO SEÇÃO - NOVOS ESTILOS PARA A PÁGINA DE PRECIFICAÇÃO ==== */
-.subpagina {
     margin-top: 20px;
 }
 
-.subpagina h2 {
-    color: #7aa2a9;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.subpagina table {
-    width: 95%;
-    margin: 20px auto;
-    border-collapse: collapse;
-}
-
-.subpagina th {
-    background-color: #dfb6b0;
-    color: white;
+.tabela-gerada th, .tabela-gerada td {
     text-align: left;
-    padding: 10px;
-}
-
-.subpagina td {
-    padding: 10px;
+    padding: 8px;
     border: 1px solid #ccc;
 }
 
-.subpagina form {
-    width: 95%;
-    margin: auto;
-    margin-bottom: 30px;
+/* Títulos das tabelas dinâmicas (cabeçalho) */
+.tabela-gerada th {
+    background-color: #cae6e7; /* Cor azul para os títulos */
+    color: #333; /* Cor do texto mais escura para melhor contraste */
 }
 
-.subpagina .form-group {
-    margin-bottom: 15px;
+/* Itens cadastrados nas tabelas dinâmicas */
+.tabela-gerada td {
+    background-color: #f8f8f8; /* Fundo cinza claro para os itens cadastrados */
 }
+/* fim - Estilos para tabelas dinâmicas */
 
-.subpagina label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.subpagina input[type="text"],
-.subpagina input[type="number"],
-.subpagina select {
-    width: calc(100% - 22px);
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    font-size: 16px;
-    background-color: #dfb6b0;
-    color: #fff;
-}
-
-.subpagina button {
-    background-color: #7aa2a9;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-.subpagina button:hover {
-    background-color: #5a8289;
-}
-
-/* Estilos específicos para a tabela de cálculo de precificação */
-#tabela-calculo-precificacao td[contenteditable="true"] {
-    background-color: #dfb6b0;
-    color: #fff;
-    cursor: pointer;
-}
-
-#tabela-calculo-precificacao td[contenteditable="true"]:focus {
-    outline: none;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
-#tabela-calculo-precificacao td:last-child {
-    font-weight: bold;
-}
-/* ==== FIM SEÇÃO - NOVOS ESTILOS PARA A PÁGINA DE PRECIFICAÇÃO ==== */
-
-/* ==== INÍCIO SEÇÃO - MEDIA QUERIES ==== */
 @media (max-width: 768px) {
     .container {
         width: 98%;
     }
 
-    .form-row .form-group {
+    .form-group {
         width: 100%;
         margin-right: 0;
     }
@@ -433,4 +201,223 @@ nav ul li a[onclick="limparPagina()"]:hover {
         overflow-x: auto;
     }
 }
-/* ==== FIM SEÇÃO - MEDIA QUERIES ==== */
+
+/* Estilos para a pesquisa de materiais */
+#resultados-pesquisa {
+    position: absolute;
+    width: 92.5%;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    z-index: 10;
+}
+
+#resultados-pesquisa div {
+    padding: 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #ccc;
+}
+
+#resultados-pesquisa div:hover {
+    background-color: #f0f0f0;
+}
+
+/* Estilos para a tabela de materiais do produto */
+#tabela-materiais-produto {
+    margin-bottom: 20px;
+}
+
+#tabela-materiais-produto td input {
+    width: 80px;
+}
+
+/* Estilo para o campo valor-hora (e agora custo-ferias-13o) */
+#valor-hora, #custo-ferias-13o {
+    background-color: #cae6e7;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Linha separadora delicada */
+.linha-separadora {
+    border: none;
+    border-top: 1px solid #7aa2a9; /* Mesma cor da borda do título */
+    margin: 20px 0; /* Espaçamento acima e abaixo */
+    width: 50%; /* Ajuste a largura conforme necessário */
+    margin-left: auto;  /* Centraliza a linha */
+    margin-right: auto; /* Centraliza a linha */
+
+}
+
+/* Estilos para a lista de custos indiretos */
+#lista-custos-indiretos {
+    list-style: none;
+    padding: 0;
+}
+
+#lista-custos-indiretos li {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: #f8f8f8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#lista-custos-indiretos li:hover {
+    background-color: #e8d7d4;
+}
+
+#lista-custos-indiretos li .custo-item-nome {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+#lista-custos-indiretos li input[type="number"] {
+    width: 100px; /* Ajuste conforme necessário */
+    margin-right: 10px;
+    background-color: #dfb6b0;
+    color: #fff;
+}
+
+#lista-custos-indiretos li button {
+    margin-left: 5px;
+}
+
+/* Estilos para a seção de cálculo da precificação */
+.calculation-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Alinha os itens à esquerda */
+    width: 80%;
+    margin: 0 auto;
+}
+
+.section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  width: 100%; /* Ocupa toda a largura */
+}
+
+.bracket {
+    font-size: 4em;
+    margin-right: 15px;
+    color: #7aa2a9;
+}
+
+.section label, .section span:not(.bracket) {
+  margin-right: 10px;
+    font-weight: bold;
+}
+
+#produto-selecionado, #horas-produto,  #margem-lucro-final{
+    padding: 8px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    margin-right: 10px;
+     background-color: #dfb6b0;
+    color: #fff;
+}
+
+/*Removido, pois agora tem detalhes*/
+/*#custos-mao-de-obra{
+    display: flex;
+    align-items: center;
+}
+
+#custo-mao-de-obra-valor, #custo-ferias-13o-valor {
+    margin-right: 5px;
+}*/
+
+.subtotal-line {
+  width: 100%; /* Ajustado para a largura da .section */
+  border-top: 2px solid #7aa2a9;
+  margin: 15px 0;
+}
+
+.subtotal, .total{
+  font-weight: bold;
+  font-size: 1.1em;
+  width: 100%;
+  justify-content: flex-end; /*Alinhar a direita*/
+  display: flex;
+}
+/*fim -  Estilos para a seção de cálculo da precificação*/
+
+/* Estilos para o autocomplete */
+#produto-resultados {
+    position: absolute;
+    z-index: 10; /* Para ficar acima de outros elementos */
+    border: 1px solid #ccc;
+    background-color: #fff;
+    max-height: 200px; /* Altura máxima com scroll */
+    overflow-y: auto;
+    width: calc(80% - 20px); /*Mesma largura com base no .calculation-container*/
+}
+
+#produto-resultados div {
+    padding: 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+#produto-resultados div:hover {
+    background-color: #f0f0f0;
+}
+
+/*Para esconder o autocomplete quando não utilizado*/
+#produto-resultados.hidden{
+  display: none;
+}
+
+#produto-pesquisa{
+    width: calc(100% - 22px); /*Para considerar o padding*/
+}
+
+/* Estilos para os detalhes (listas/tabelas) */
+#detalhes-produto,
+#detalhes-custos-indiretos {
+    margin-bottom: 20px;
+    width: 100%; /* Para ocupar a largura total */
+}
+
+#lista-materiais-produto,
+#lista-custos-indiretos-detalhes {
+    list-style: none; /* Sem marcadores */
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+#lista-materiais-produto li,
+#lista-custos-indiretos-detalhes li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+#lista-materiais-produto li:last-child,
+#lista-custos-indiretos-detalhes li:last-child {
+    border-bottom: none; /* Remove a borda do último item */
+}
+
+/* Estilos para os detalhes da mão de obra */
+#detalhes-mao-de-obra {
+  display: flex;         /* Flexbox para alinhar os itens */
+  flex-direction: column; /* Organiza os itens verticalmente */
+  align-items: flex-start; /* Alinha os itens à esquerda */
+  margin-bottom: 15px;      /* Espaçamento inferior */
+  margin-left: 50px;    /*Recuo a esquerda*/
+}
+
+.custo-detalhe {
+  display: flex;         /* Flexbox para cada linha */
+  justify-content: space-between; /* Espaço entre os elementos */
+  width: 280px;          /* Largura para alinhar os valores */
+  margin-bottom: 5px;     /* Espaçamento entre as linhas */
+}
+
+.custo-detalhe span:first-child {
+  margin-right: 10px; /*Espaço entre o nome e os : */
+}
