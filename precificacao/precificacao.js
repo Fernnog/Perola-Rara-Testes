@@ -23,6 +23,7 @@ let produtos = [];
 let modoEdicaoMaoDeObra = false;
 let itemEdicaoCustoIndireto = null;
 let novoCustoIndiretoCounter = 0; // Contador para IDs únicos de custos indiretos adicionais
+let taxaCredito = {percentual: 6, incluir: false}; //Objeto para taxa de crédito
 
 
 /* Formatação de valores em moeda */
@@ -83,19 +84,20 @@ function calcularCustoUnitario(tipo, valorTotal, comprimentoCm, volumeMl, pesoG,
     let custoUnitario = 0;
     switch (tipo) {
         case "comprimento":
-            custoUnitario = valorTotal / (comprimentoCm / 100);
+            custoUnitario = valorTotal / (comprimentoCm / 100);  // Divide por 100 para converter cm para m
             break;
         case "litro":
-            custoUnitario = valorTotal / (volumeMl / 1000);
+            custoUnitario = valorTotal / (volumeMl / 1000); // Divide por 1000 para converter ml para L
             break;
         case "quilo":
-            custoUnitario = valorTotal / (pesoG / 1000);
+            custoUnitario = valorTotal / (pesoG / 1000);  // Divide por 1000 para converter g para kg
             break;
         case "unidade":
             custoUnitario = valorTotal;
             break;
         case "area":
-            custoUnitario = valorTotal / (larguraCm * alturaCm / 10000);
+            // A área já é calculada em m² em cadastrarMaterialInsumo
+            custoUnitario = valorTotal / ((larguraCm/100) * (alturaCm/100)); // Divide o valor total pela área em m²
             break;
     }
     return custoUnitario;
@@ -103,22 +105,85 @@ function calcularCustoUnitario(tipo, valorTotal, comprimentoCm, volumeMl, pesoG,
 
 /* Cadastrar Material/Insumo */
 function cadastrarMaterialInsumo() {
-    const nome = document.getElementById('nome-material').value;
+    const nome = document.getElementById('nome-material').value.trim();
     const valorTotal = parseFloat(document.getElementById('valor-total-material').value);
     const tipo = document.querySelector('input[name="tipo-material"]:checked').value;
-    const comprimentoCm = (tipo === 'comprimento') ? parseFloat(document.getElementById('comprimento-cm').value) : 0;
-    const volumeMl = (tipo === 'litro') ? parseFloat(document.getElementById('volume-ml').value) : 0;
-    const pesoG = (tipo === 'quilo') ? parseFloat(document.getElementById('peso-g').value) : 0;
-    const larguraCm = (tipo === 'area') ? parseFloat(document.getElementById('largura-cm').value) : 0;
-    const alturaCm = (tipo === 'area') ? parseFloat(document.getElementById('altura-cm').value) : 0;
+    let comprimentoCm = 0, volumeMl = 0, pesoG = 0, larguraCm = 0, alturaCm = 0;
 
+    // --- Validação de entrada (mantido) ---
+    if (!nome) {
+        alert("Por favor, insira um nome para o material.");
+        return;
+    }
+    if (isNaN(valorTotal) || valorTotal <= 0) {
+        alert("Por favor, insira um valor total válido (maior que zero).");
+        return;
+    }
+
+    // --- Coleta e validação de dimensões (mantido) ---
+    if (tipo === 'comprimento') {
+        comprimentoCm = parseFloat(document.getElementById('comprimento-cm').value);
+        if (isNaN(comprimentoCm) || comprimentoCm <= 0) {
+            alert("Por favor, insira um comprimento válido (maior que zero).");
+            return;
+        }
+    } else if (tipo === 'litro') {
+        volumeMl = parseFloat(document.getElementById('volume-ml').value);
+        if (isNaN(volumeMl) || volumeMl <= 0) {
+            alert("Por favor, insira um volume válido (maior que zero).");
+            return;
+        }
+    } else if (tipo === 'quilo') {
+        pesoG = parseFloat(document.getElementById('peso-g').value);
+        if (isNaN(pesoG) || pesoG <= 0) {
+            alert("Por favor, insira um peso válido (maior que zero).");
+            return;
+        }
+    } else if (tipo === 'area') {
+        larguraCm = parseFloat(document.getElementById('largura-cm').value);
+        alturaCm = parseFloat(document.getElementById('altura-cm').value);
+        if (isNaN(larguraCm) || larguraCm <= 0 || isNaN(alturaCm) || alturaCm <= 0) {
+            alert("Por favor, insira dimensões válidas para a área (maiores que zero).");
+            return;
+        }
+    }
+
+    // --- Cálculo do Custo Unitário (mantido) ---
     const custoUnitario = calcularCustoUnitario(tipo, valorTotal, comprimentoCm, volumeMl, pesoG, larguraCm, alturaCm);
 
-    const item = { nome, tipo, custoUnitario };
+    // --- Criação do objeto do material (mantido) ---
+    const item = {
+        nome,
+        tipo,
+        custoUnitario,
+        comprimentoCm,
+        volumeMl,
+        pesoG,
+        larguraCm,
+        alturaCm
+    };
+
+    // 1. Adiciona o item ao array de materiais.
     materiais.push(item);
 
+    // 2. Atualiza a tabela *ANTES* de resetar o formulário.
     atualizarTabelaMateriaisInsumos();
+
+
+    // 3. Limpa *todos* os campos do formulário.
     limparFormulario('form-materiais-insumos');
+
+    // 4. Reseta o título do formulário.
+    document.getElementById('titulo-materiais-insumos').textContent = "Cadastro de Materiais e Insumos";
+
+    // 5. Seleciona o radio button "Comprimento" *e* dispara o evento 'change'.
+    const radioComprimento = document.querySelector('input[name="tipo-material"][value="comprimento"]');
+    radioComprimento.checked = true;
+    radioComprimento.dispatchEvent(new Event('change')); // <-- Importante!
+
+    // 6. Garante que o placeholder do comprimento esteja correto (cm).
+    document.getElementById('comprimento-cm').placeholder = "Comprimento (cm)";
+
 }
 
 /* Atualizar a tabela de Materiais e Insumos */
@@ -198,26 +263,34 @@ function buscarMateriaisCadastrados() {
 function editarMaterialInsumo(index) {
     const item = materiais[index];
 
+    // --- Preenche os campos do formulário ---
     document.getElementById('nome-material').value = item.nome;
-    document.getElementById('valor-total-material').value = item.custoUnitario;
-    document.querySelector(`input[name="tipo-material"][value="${item.tipo}"]`).checked = true;
-    document.querySelector(`input[name="tipo-material"][value="${item.tipo}"]`).dispatchEvent(new Event('change'));
+    document.getElementById('valor-total-material').value = item.tipo === 'area' ? item.custoUnitario * ((item.larguraCm/100) * (item.alturaCm/100)) : item.custoUnitario;  //Mantem o valor total.
 
+    // Seleciona o radio button correto *e* dispara o evento 'change'
+    const radio = document.querySelector(`input[name="tipo-material"][value="${item.tipo}"]`);
+    radio.checked = true;
+    radio.dispatchEvent(new Event('change')); //  <-- Importante!
+
+    // Preenche os campos de dimensão (se existirem)
     if (item.tipo === 'comprimento') {
-        document.getElementById('comprimento-cm').value = 100;
+        document.getElementById('comprimento-cm').value = item.comprimentoCm;
     } else if (item.tipo === 'litro') {
-        document.getElementById('volume-ml').value = 1000;
+        document.getElementById('volume-ml').value = item.volumeMl;
     } else if (item.tipo === 'quilo') {
-        document.getElementById('peso-g').value = 1000;
+        document.getElementById('peso-g').value = item.pesoG;
     } else if (item.tipo === 'area') {
-        document.getElementById('largura-cm').value = 100;
-        document.getElementById('altura-cm').value = 100;
+        document.getElementById('largura-cm').value = item.larguraCm;
+        document.getElementById('altura-cm').value = item.alturaCm;
     }
 
+    // --- Remove o item original (vai ser readicionado no final do cadastro) ---
     materiais.splice(index, 1);
     atualizarTabelaMateriaisInsumos();
+
+    // --- Scroll e foco ---
     document.getElementById('materiais-insumos').scrollIntoView({ behavior: 'smooth' });
-    document.getElementById('titulo-materiais-insumos').textContent = 'Editar Material/Insumo';
+     document.getElementById('titulo-materiais-insumos').textContent = 'Editar Material/Insumo';
 }
 
 function removerMaterialInsumo(index) {
@@ -545,28 +618,63 @@ function buscarCustosIndiretosCadastrados() {
     });
 }
 
-
 // --- Produtos Cadastrados ---
 function cadastrarProduto() {
     const nomeProduto = document.getElementById('nome-produto').value;
     const tabelaMateriaisProduto = document.getElementById('tabela-materiais-produto').querySelector('tbody');
     const linhasMateriais = tabelaMateriaisProduto.rows;
+
+    if (!nomeProduto || linhasMateriais.length === 0) {
+        alert("Por favor, preencha o nome do produto e adicione pelo menos um material.");
+        return;
+    }
+
     let materiaisDoProduto = [];
     let custoTotalMateriaisProduto = 0;
 
     for (let i = 0; i < linhasMateriais.length; i++) {
         const linha = linhasMateriais[i];
         const nomeMaterial = linha.cells[0].textContent;
-        const tipoMaterial = linha.cells[1].textContent;
+        const tipoMaterial = linha.cells[1].textContent.split(' ')[0]; // Pega só a primeira parte (tipo)
         const custoUnitarioMaterial = parseFloat(linha.cells[2].textContent.replace(/[^\d.,-]/g, '').replace('.', '').replace(',', '.'));
-        const quantidadeMaterial = parseInt(linha.cells[3].querySelector('input').value);
-        const custoTotalMaterial = custoUnitarioMaterial * quantidadeMaterial;
+
+        // --- DIMENSÕES (agora em sua própria célula) ---
+        const larguraInput = linha.cells[3].querySelector('.dimensoes-input.largura');
+        const alturaInput = linha.cells[3].querySelector('.dimensoes-input.altura');
+        const comprimentoInput = linha.cells[3].querySelector('.dimensoes-input.comprimento'); //Se for comprimento
+
+        const largura = larguraInput ? parseFloat(larguraInput.value) : 0;
+        const altura = alturaInput ? parseFloat(alturaInput.value) : 0;
+        const comprimento = comprimentoInput? parseFloat(comprimentoInput.value) : 0;
+
+
+        // --- QUANTIDADE (agora separada das dimensões) ---
+        const quantidadeInput = linha.cells[4].querySelector('.quantidade-input');  // Célula 4
+        let quantidadeMaterial = quantidadeInput ? parseFloat(quantidadeInput.value) : 0;
+
+
+        // --- CÁLCULO DO CUSTO TOTAL (CORREÇÃO AQUI) ---
+        let custoTotalMaterial = 0;
+        if (tipoMaterial === 'Área') {
+            const area = (largura * altura) / 10000; // Calcula a área em m²
+            custoTotalMaterial = custoUnitarioMaterial * area;
+        } else if (tipoMaterial === 'Comprimento') {
+            // CONVERTE comprimento de cm para m ANTES de calcular o custo
+            const comprimentoEmMetros = comprimento / 100;
+            custoTotalMaterial = custoUnitarioMaterial * comprimentoEmMetros; // Usa o comprimento em METROS
+        } else {
+            custoTotalMaterial = custoUnitarioMaterial * quantidadeMaterial;
+        }
+
 
         materiaisDoProduto.push({
             nome: nomeMaterial,
             tipo: tipoMaterial,
             custoUnitario: custoUnitarioMaterial,
-            quantidade: quantidadeMaterial,
+            largura: largura,      // Valor da largura
+            altura: altura,       // Valor da altura
+            comprimento: comprimento, //Comprimento *em cm* (para consistência e edição)
+            quantidade: quantidadeMaterial, // Valor da QUANTIDADE (separado)
             custoTotal: custoTotalMaterial
         });
         custoTotalMateriaisProduto += custoTotalMaterial;
@@ -585,7 +693,6 @@ function cadastrarProduto() {
     alert('Produto cadastrado com sucesso!');
 }
 
-
 function atualizarTabelaProdutosCadastrados() {
     const tbody = document.querySelector('#tabela-produtos tbody');
     tbody.innerHTML = '';
@@ -601,7 +708,13 @@ function atualizarTabelaProdutosCadastrados() {
 
         let listaMateriaisHTML = '<ul>';
         produto.materiais.forEach(material => {
-            listaMateriaisHTML += `<li>${material.nome} - ${formatarMoeda(material.custoTotal)} (Qtd: ${material.quantidade})</li>`;
+            let dimensoesTexto = '';
+            if (material.tipo === 'Área') {
+                dimensoesTexto = `(${material.largura.toFixed(2)}cm x ${material.altura.toFixed(2)}cm)`;
+            } else if (material.tipo === 'Comprimento') {
+                dimensoesTexto = `(${material.comprimento.toFixed(2)}cm)`;
+            }
+            listaMateriaisHTML += `<li>${material.nome} ${dimensoesTexto} - ${formatarMoeda(material.custoTotal)} (Qtd: ${material.quantidade.toFixed(2)})</li>`;
         });
         listaMateriaisHTML += '</ul>';
         cellMateriaisUtilizados.innerHTML = listaMateriaisHTML;
@@ -631,7 +744,7 @@ function buscarProdutosCadastrados() {
     const produtosFiltrados = produtos.filter(produto => produto.nome.toLowerCase().includes(termoBusca));
 
     produtosFiltrados.forEach((produto, index) => {
-        const row = tbody.insertRow();
+		const row = tbody.insertRow();
         const cellNomeProduto = row.insertCell();
         const cellMateriaisUtilizados = row.insertCell();
         const cellCustoTotalMateriais = row.insertCell();
@@ -641,7 +754,14 @@ function buscarProdutosCadastrados() {
 
         let listaMateriaisHTML = '<ul>';
         produto.materiais.forEach(material => {
-            listaMateriaisHTML += `<li>${material.nome} - ${formatarMoeda(material.custoTotal)} (Qtd: ${material.quantidade})</li>`;
+			//Modificação para exibir largura e altura.
+            let dimensoesTexto = '';
+            if (material.tipo === 'Área') {
+                dimensoesTexto = `(${material.largura.toFixed(2)}cm x ${material.altura.toFixed(2)}cm)`;
+            }else if (material.tipo === 'Comprimento') {
+                dimensoesTexto = `(${material.comprimento.toFixed(2)}cm)`; //Mostra o comprimento
+            }
+            listaMateriaisHTML += `<li>${material.nome} ${dimensoesTexto} - ${formatarMoeda(material.custoTotal)} (Qtd: ${material.quantidade.toFixed(2)})</li>`;
         });
         listaMateriaisHTML += '</ul>';
         cellMateriaisUtilizados.innerHTML = listaMateriaisHTML;
@@ -661,6 +781,179 @@ function buscarProdutosCadastrados() {
         });
         cellAcoes.appendChild(botaoRemoverProduto);
     });
+}
+
+function adicionarMaterialNaTabelaProduto(material) {
+    const tbody = document.querySelector('#tabela-materiais-produto tbody');
+    const row = tbody.insertRow();
+    const cellNome = row.insertCell();
+    const cellTipo = row.insertCell();
+    const cellCustoUnitario = row.insertCell();
+    const cellDimensoes = row.insertCell();
+    const cellQuantidade = row.insertCell();
+    const cellCustoTotal = row.insertCell();
+    const cellAcoes = row.insertCell();
+
+    cellNome.textContent = material.nome;
+    let unidade = '';
+    switch (material.tipo) {
+        case 'comprimento': unidade = ' (m)'; break;
+        case 'litro': unidade = ' (L)'; break;
+        case 'quilo': unidade = ' (kg)'; break;
+        case 'unidade': unidade = ' (un)'; break;
+        case 'area': unidade = ' (m²)'; break;
+    }
+    cellTipo.textContent = material.tipo.charAt(0).toUpperCase() + material.tipo.slice(1) + unidade;
+    cellCustoUnitario.textContent = formatarMoeda(material.custoUnitario);
+
+    // --- Campos de Dimensões (Largura, Altura e Comprimento) ---
+    // MODIFICAÇÃO AQUI: Adiciona a unidade de medida ao placeholder
+    let larguraInput, alturaInput, comprimentoInput;
+
+    if (material.tipo === 'area') {
+        larguraInput = document.createElement('input');
+        larguraInput.type = 'number';
+        larguraInput.placeholder = 'Largura (cm)'; // Adiciona (cm)
+        larguraInput.min = 0.01;
+        larguraInput.step = 0.01;
+        larguraInput.classList.add('dimensoes-input', 'largura');
+        larguraInput.value = material.largura || '';
+
+        alturaInput = document.createElement('input');
+        alturaInput.type = 'number';
+        alturaInput.placeholder = 'Altura (cm)'; // Adiciona (cm)
+        alturaInput.min = 0.01;
+        alturaInput.step = 0.01;
+        alturaInput.classList.add('dimensoes-input', 'altura');
+        alturaInput.value = material.altura || '';
+
+        cellDimensoes.appendChild(larguraInput);
+        cellDimensoes.appendChild(alturaInput);
+
+    } else if (material.tipo === 'comprimento') {
+        comprimentoInput = document.createElement('input');
+        comprimentoInput.type = 'number';
+        comprimentoInput.placeholder = 'Comprimento (cm)'; // Adiciona (cm)
+        comprimentoInput.min = 0.01;
+        comprimentoInput.step = 0.01;
+        comprimentoInput.classList.add('dimensoes-input', 'comprimento');
+        comprimentoInput.value = material.comprimento || '';
+        cellDimensoes.appendChild(comprimentoInput);
+    }
+    // --- Campo de Quantidade (AGORA SEPARADO) ---
+    const inputQuantidade = document.createElement('input');
+    inputQuantidade.type = 'number';
+    inputQuantidade.value = material.quantidade || 1;
+    inputQuantidade.min = 0.01;
+    inputQuantidade.step = 0.01;
+    inputQuantidade.classList.add('quantidade-input');
+    inputQuantidade.readOnly = material.tipo === 'area';
+
+
+    const unidadeMedidaSpan = document.createElement('span');
+    unidadeMedidaSpan.classList.add('unidade-medida');
+    // --- Lógica para Área (agora calcula e exibe a área corretamente) ---
+    if (material.tipo === 'area') {
+        const areaSpan = document.createElement('span');
+        areaSpan.classList.add('dimensoes-span');
+        cellDimensoes.appendChild(areaSpan);
+        unidadeMedidaSpan.textContent = '';
+
+        // Função para calcular a área e atualizar o custo total
+        function calcularAreaEAtualizar() {
+            const largura = parseFloat(larguraInput.value) || 0;
+            const altura = parseFloat(alturaInput.value) || 0;
+
+            if (isNaN(largura) || largura <= 0 || isNaN(altura) || altura <= 0) {
+                areaSpan.textContent = '0.00 m²';
+                inputQuantidade.value = 0;
+                calcularCustoTotalMaterial();
+                return;
+            }
+
+            const area = (largura * altura) / 10000;
+            areaSpan.textContent = area.toFixed(2) + ' m²';
+            inputQuantidade.value = area.toFixed(2);
+            calcularCustoTotalMaterial();
+        }
+
+        larguraInput.addEventListener('input', calcularAreaEAtualizar);
+        alturaInput.addEventListener('input', calcularAreaEAtualizar);
+
+        calcularAreaEAtualizar();
+
+    } else if(material.tipo === 'comprimento'){
+        const comprimentoSpan = document.createElement('span');
+        comprimentoSpan.classList.add('dimensoes-span');
+        cellDimensoes.appendChild(comprimentoSpan);
+        unidadeMedidaSpan.textContent = '';
+
+        function calcularComprimentoEAtualizar(){
+            const comprimento = parseFloat(comprimentoInput.value) || 0;
+
+            if(isNaN(comprimento) || comprimento <= 0){
+                comprimentoSpan.textContent = '0.00 cm';
+                inputQuantidade.value = 0;
+                calcularCustoTotalMaterial();
+                return;
+            }
+
+            comprimentoSpan.textContent = comprimento.toFixed(2) + ' cm';
+            inputQuantidade.value = comprimento.toFixed(2);
+            calcularCustoTotalMaterial();
+        }
+        comprimentoInput.addEventListener('input', calcularComprimentoEAtualizar);
+        calcularComprimentoEAtualizar();
+
+    }else {
+        unidadeMedidaSpan.textContent = unidade;
+        inputQuantidade.addEventListener('input', calcularCustoTotalMaterial);
+    }
+
+    cellQuantidade.appendChild(inputQuantidade);
+    cellQuantidade.appendChild(unidadeMedidaSpan);
+
+
+    // --- Função para calcular o custo total ---
+    function calcularCustoTotalMaterial() {
+        let quantidade = parseFloat(inputQuantidade.value);
+         if (isNaN(quantidade) || quantidade <= 0) {
+            if(material.tipo !== 'area' && material.tipo !== 'comprimento'){
+                quantidade = 0.01;
+                inputQuantidade.value = quantidade;
+            } else{
+                quantidade = 0;
+            }
+        }
+
+        let custoTotal = 0;
+        if(material.tipo === "area"){
+            const largura = parseFloat(larguraInput.value) || 0;
+            const altura = parseFloat(alturaInput.value) || 0;
+            const area = (largura * altura) / 10000;
+            custoTotal = material.custoUnitario * area;
+
+        } else if(material.tipo === "comprimento") {
+            const comprimento = parseFloat(comprimentoInput.value) || 0;
+            const comprimentoEmMetros = comprimento / 100;
+            custoTotal = material.custoUnitario * comprimentoEmMetros;
+
+        } else {
+          custoTotal = material.custoUnitario * quantidade;
+        }
+
+        cellCustoTotal.textContent = formatarMoeda(custoTotal);
+    }
+
+    calcularCustoTotalMaterial();
+
+
+    const botaoRemoverMaterial = document.createElement('button');
+    botaoRemoverMaterial.textContent = 'Remover';
+    botaoRemoverMaterial.addEventListener('click', function() {
+        removerLinhaMaterial(row);
+    });
+    cellAcoes.appendChild(botaoRemoverMaterial);
 }
 
 function editarProduto(index) {
@@ -718,48 +1011,6 @@ document.getElementById('pesquisa-material').addEventListener('input', function(
     }
 });
 
-function adicionarMaterialNaTabelaProduto(material) {
-    const tbody = document.querySelector('#tabela-materiais-produto tbody');
-    const row = tbody.insertRow();
-    const cellNome = row.insertCell();
-    const cellTipo = row.insertCell();
-    const cellCustoUnitario = row.insertCell();
-    const cellQuantidade = row.insertCell();
-    const cellCustoTotal = row.insertCell();
-    const cellAcoes = row.insertCell();
-
-    cellNome.textContent = material.nome;
-    cellTipo.textContent = material.tipo;
-    cellCustoUnitario.textContent = formatarMoeda(material.custoUnitario);
-
-    const inputQuantidade = document.createElement('input');
-    inputQuantidade.type = 'number';
-    inputQuantidade.value = 1;
-    inputQuantidade.min = 1;
-    cellQuantidade.appendChild(inputQuantidade);
-
-    inputQuantidade.addEventListener('change', function() {
-        const quantidade = parseInt(this.value);
-        if (!isNaN(quantidade) && quantidade >= 0) {
-            const custoTotal = material.custoUnitario * quantidade;
-            cellCustoTotal.textContent = formatarMoeda(custoTotal);
-        } else {
-            cellQuantidade.value = 1;
-            cellCustoTotal.textContent = formatarMoeda(material.custoUnitario);
-        }
-    });
-
-    const custoTotalInicial = material.custoUnitario * parseInt(inputQuantidade.value);
-    cellCustoTotal.textContent = formatarMoeda(custoTotalInicial);
-
-    const botaoRemoverMaterial = document.createElement('button');
-    botaoRemoverMaterial.textContent = 'Remover';
-    botaoRemoverMaterial.addEventListener('click', function() {
-        removerLinhaMaterial(row);
-    });
-    cellAcoes.appendChild(botaoRemoverMaterial);
-}
-
 function removerLinhaMaterial(row) {
     row.remove();
 }
@@ -810,8 +1061,15 @@ function carregarDadosProduto(nomeProduto) {
         listaMateriais.innerHTML = ''; // Limpa a lista
 
         produto.materiais.forEach(material => {
+            //Modificação para exibir largura e altura
+			let dimensoesTexto = '';
+            if (material.tipo === 'Área') {
+                dimensoesTexto = `(${material.largura.toFixed(2)}cm x ${material.altura.toFixed(2)}cm)`;
+            }else if (material.tipo === 'Comprimento') {
+                dimensoesTexto = `(${material.comprimento.toFixed(2)}cm)`; //Mostra o comprimento
+            }
             const li = document.createElement('li');
-            li.textContent = `${material.nome} (${material.tipo}) - Qtd: ${material.quantidade} - Custo: ${formatarMoeda(material.custoTotal)}`;
+            li.textContent = `${material.nome} ${dimensoesTexto} (${material.tipo}) - Qtd: ${material.quantidade.toFixed(2)} - Custo: ${formatarMoeda(material.custoTotal)}`;  //Quantidade com 2 casas
             listaMateriais.appendChild(li);
         });
         detalhesProdutoDiv.style.display = 'block'; // Mostra a div
@@ -878,7 +1136,7 @@ function calcularCustos() {
     const subtotal = custoProduto + totalMaoDeObra + custoIndiretoTotalProduto;
     document.getElementById('subtotal').textContent = formatarMoeda(subtotal);
 
-    calcularPrecoVendaFinal();
+    calcularPrecoVendaFinal(); //Chama para já calcular com os novos valores.
 }
 
 function calcularPrecoVendaFinal(){
@@ -887,8 +1145,41 @@ function calcularPrecoVendaFinal(){
 
     // Converte o subtotal para um número, tratando a formatação de moeda
     const subtotalNumerico = parseFloat(subtotalTexto.replace(/[^\d,-]/g, '').replace('.', '').replace(',', '.')) || 0;
-    const precoVendaFinal = subtotalNumerico * (1 + margemLucro);
-    document.getElementById('total-final').textContent = formatarMoeda(precoVendaFinal);
+    const precoVenda = subtotalNumerico * (1 + margemLucro);
+     const margemLucroValor = precoVenda - subtotalNumerico; //Calcula a margem
+    document.getElementById('margem-lucro-valor').textContent = formatarMoeda(margemLucroValor);
+    document.getElementById('total-final').textContent = formatarMoeda(precoVenda);
+
+    calcularTotalComTaxas(); //Chama a função para o cálculo final.
+}
+
+// --- Função para Taxa de Crédito ---
+function salvarTaxaCredito() {
+    const incluir = document.getElementById('incluir-taxa-credito-sim').checked;
+    const percentual = parseFloat(document.getElementById('taxa-credito-percentual').value);
+
+    if (incluir && (isNaN(percentual) || percentual < 0)) {
+        alert("Por favor, insira um valor percentual válido para a taxa.");
+        return;
+    }
+
+    taxaCredito.incluir = incluir;
+    taxaCredito.percentual = incluir ? percentual : 0; //Salva 0 se não incluir.
+    calcularTotalComTaxas(); //Recalcula o total com a nova taxa.
+}
+
+function calcularTotalComTaxas() {
+    const precoVendaTexto = document.getElementById('total-final').textContent; //Pega do total com margem.
+    const precoVendaNumerico = parseFloat(precoVendaTexto.replace(/[^\d,-]/g, '').replace('.', '').replace(',', '.')) || 0;
+
+    let taxaCreditoValor = 0;
+    if (taxaCredito.incluir) {
+        taxaCreditoValor = precoVendaNumerico * (taxaCredito.percentual / 100);
+    }
+    document.getElementById('taxa-credito-valor').textContent = formatarMoeda(taxaCreditoValor);
+
+    const totalFinalComTaxas = precoVendaNumerico + taxaCreditoValor;
+    document.getElementById('total-final-com-taxas').textContent = formatarMoeda(totalFinalComTaxas);
 }
 
 // Event Listeners (ajustado)
@@ -902,6 +1193,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Eventos para cálculo
     document.getElementById('horas-produto').addEventListener('input', calcularCustos);
      document.getElementById('margem-lucro-final').addEventListener('input', calcularPrecoVendaFinal);
+
+     //Eventos para a taxa
+     document.getElementById('incluir-taxa-credito-sim').addEventListener('change', salvarTaxaCredito);
+      document.getElementById('incluir-taxa-credito-nao').addEventListener('change', salvarTaxaCredito);
+     document.getElementById('taxa-credito-percentual').addEventListener('input', salvarTaxaCredito);
 });
 
 //Para esconder o autocomplete quando clica fora.
