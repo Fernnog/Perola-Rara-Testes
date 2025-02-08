@@ -313,3 +313,27 @@ nav ul li a[onclick="limparPagina()"]:hover {
     }
 }
 /* ==== FIM SEÇÃO - MEDIA QUERIES ==== */
+
+/* ==== Adicionado: Estilos para a seção de login ==== */
+#auth-container {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    text-align: center; /* Centraliza o conteúdo */
+}
+
+#auth-container h2 {
+    margin-bottom: 10px;
+}
+
+#login-form, #logged-in-message {
+    margin-top: 15px;
+}
+
+#login-form label, #login-form input {
+    display: block; /* Faz com que labels e inputs fiquem em linhas separadas */
+    width: 100%;   /* Ocupa toda a largura disponível */
+    margin-bottom: 5px;
+}
+/* ==== Fim da adição ==== */
