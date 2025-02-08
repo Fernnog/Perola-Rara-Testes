@@ -5,15 +5,350 @@ let numeroOrcamento = 1;
 let numeroPedido = 1;
 const anoAtual = new Date().getFullYear();
 let orcamentoEditando = null; // Variável para controlar se está editando um orçamento
+let db; // Adicionando a variável db aqui
 /* ==== FIM SEÇÃO - VARIÁVEIS GLOBAIS ==== */
 
-/* ==== INÍCIO SEÇÃO - CARREGAR DADOS DO LOCALSTORAGE ==== */
+/* ==== INÍCIO SEÇÃO - Inicialização do Firebase ==== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCGCs3T-fV-PlalDSz_dqN1BvzoxSwjv5U",
+  authDomain: "perola-rara-ae5bc.firebaseapp.com",
+  projectId: "perola-rara-ae5bc",
+  storageBucket: "perola-rara-ae5bc.firebasestorage.com",
+  messagingSenderId: "968229137782",
+  appId: "1:968229137782:web:682d4e0e851bf0e3f41e57",
+  measurementId: "G-D0KYCNJW4P"
+};
+
+firebase.initializeApp(firebaseConfig);
+db = firebase.firestore();
+/* ==== FIM SEÇÃO - Inicialização do Firebase ==== */
+
+/* ==== INÍCIO SEÇÃO - Funções de Autenticação ==== */
+// Função para exibir mensagens (erro ou sucesso)
+function showAuthMessage(message, isError = true) {
+    const messageElement = document.getElementById('auth-message');
+    messageElement.textContent = message;
+    messageElement.style.color = isError ? 'red' : 'green';
+}
+
+// Função de Cadastro
+async function registerUser(email, password) {
+    try {
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        // Usuário cadastrado com sucesso!
+        console.log("Usuário cadastrado:", userCredential.user);
+        showAuthMessage("Usuário cadastrado com sucesso!", false); // Mensagem de sucesso
+        // Você *não* precisa fazer login automaticamente após o cadastro.
+        // O onAuthStateChanged já vai detectar o novo usuário.
+
+    } catch (error) {
+        console.error("Erro ao cadastrar usuário:", error);
+        showAuthMessage(getErrorMessage(error)); // Exibe a mensagem de erro
+    }
+}
+
+// Função de Login
+async function loginUser(email, password) {
+    try {
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+        // Login com sucesso!
+        console.log("Usuário logado:", userCredential.user);
+        showAuthMessage("Login realizado com sucesso!", false);
+
+
+    } catch (error) {
+        console.error("Erro ao fazer login:", error);
+        showAuthMessage(getErrorMessage(error));
+    }
+}
+// Função de Logout
+async function logoutUser() {
+    try {
+        await firebase.auth().signOut();
+        // Logout com sucesso!
+        console.log("Usuário deslogado");
+        showAuthMessage("Logout realizado com sucesso!", false);
+
+    } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+        showAuthMessage(getErrorMessage(error));
+    }
+}
+
+// --- Tratamento de Erros (Firebase) ---
+//Função para formatar mensagens de erro
+function getErrorMessage(error) {
+    switch (error.code) {
+        case 'auth/email-already-in-use':
+            return "Este email já está em uso.";
+        case 'auth/invalid-email':
+            return "Email inválido.";
+        case 'auth/weak-password':
+            return "A senha deve ter pelo menos 6 caracteres.";
+        case 'auth/wrong-password':
+            return "Senha incorreta.";
+        case 'auth/user-not-found':
+            return "Usuário não encontrado.";
+        case 'auth/too-many-requests':
+            return 'Muitas tentativas de login. Tente novamente mais tarde.';
+        default:
+            return "Erro: " + error.message; // Mensagem de erro genérica
+    }
+}
+// --- Monitorando o Estado de Autenticação ---
+
+firebase.auth().onAuthStateChanged(user => {
+    const loginForm = document.getElementById('login-form');
+    const loggedInMessage = document.getElementById('logged-in-message');
+    const userEmailSpan = document.getElementById('user-email');
+
+    if (user) {
+        // Usuário está logado
+        loginForm.style.display = 'none'; // Esconde o formulário
+        loggedInMessage.style.display = 'block'; // Mostra a mensagem de logado
+        userEmailSpan.textContent = user.email; // Exibe o email do usuário
+        carregarDadosFirebase(); // Carrega os dados do Firebase
+    } else {
+        // Usuário não está logado
+        loginForm.style.display = 'block'; // Mostra o formulário
+        loggedInMessage.style.display = 'none'; // Esconde a mensagem
+        //Limpa o painel de backup.
+        const painel = document.getElementById('ultimoBackup');
+        painel.innerHTML = 'Nenhum backup encontrado';
+        //Não precisa chamar carregarDadosFirebase() aqui, pois não tem usuário logado.
+    }
+});
+
+
+// --- Event Listeners (Login, Cadastro, Logout) ---
+
+document.getElementById('btn-login').addEventListener('click', () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    loginUser(email, password);
+});
+
+document.getElementById('btn-register').addEventListener('click', () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    registerUser(email, password);
+});
+
+document.getElementById('btn-logout').addEventListener('click', logoutUser);
+
+/* ==== FIM SEÇÃO - Funções de Autenticação ==== */
+
+/* ==== INÍCIO SEÇÃO - Funções do Firebase (Salvar/Carregar) ==== */
+
+async function salvarDadosFirebase() {
+    try {
+        const dadosParaSalvar = {
+            orcamentos,
+            pedidos,
+            numeroOrcamento,
+            numeroPedido,
+            precificacao: { // Mesma estrutura que você usava para exportar
+                materiais,
+                maoDeObra,
+                custosIndiretosPredefinidos,
+                custosIndiretosAdicionais,
+                produtos,
+                taxaCredito,
+                margemLucroPadrao,
+                novoCustoIndiretoCounter
+            }
+        };
+
+        // --- Autenticação (IMPORTANTE!) ---
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            alert("Nenhum usuário logado. Os dados não serão salvos."); // Ou trate de outra forma
+            return; // Sai da função se não houver usuário logado
+        }
+        const userId = user.uid; // Obtém o ID do usuário logado
+
+
+        await db.collection("dados").doc(userId).set(dadosParaSalvar); // Salva/Sobrescreve
+        alert("Dados salvos com sucesso no Firebase!");
+
+        // --- Atualiza Painel (opcional, se você ainda quiser) ---
+        const agora = new Date();
+        const dataFormatada = agora.toLocaleString('pt-BR'); //Formato DD/MM/AAAA, HH:mm:ss
+        localStorage.setItem('ultimoBackup', JSON.stringify({ nomeArquivo: "backup_firebase", data: agora.toISOString() }));
+        atualizarPainelUltimoBackup();
+
+
+    } catch (error) {
+        console.error("Erro ao salvar dados no Firebase:", error);
+        alert("Erro ao salvar dados: " + error.message); // Mensagem de erro mais amigável
+    }
+}
+
+async function carregarDadosFirebase() {
+    try {
+        // --- Autenticação (IMPORTANTE!) ---
+        const user = firebase.auth().currentUser;
+          if (!user) {
+                //Se não tiver usuário logado, não carrega os dados, mas também NÃO limpa as variáveis.
+                //Isso permite que os dados "locais" (da sessão) continuem existindo.
+                console.log('Nenhum usuário logado. Carregando dados locais (se houver).');
+                return; // Sai da função, mas *sem* limpar as variáveis
+          }
+        const userId = user.uid;
+
+        const docRef = db.collection("dados").doc(userId);
+        const doc = await docRef.get();
+
+        if (doc.exists) {
+            const dados = doc.data();
+            //Carregamento dos dados principais.
+            orcamentos = dados.orcamentos || [];
+            pedidos = dados.pedidos || [];
+            numeroOrcamento = dados.numeroOrcamento || 1;
+            numeroPedido = dados.numeroPedido || 1;
+
+            // Carrega os dados de precificação
+            if (dados.precificacao) {
+                const dadosPrecificacao = dados.precificacao;
+                materiais = dadosPrecificacao.materiais || [];
+                maoDeObra = dadosPrecificacao.maoDeObra || { salario: 0, horas: 220, valorHora: 0, incluirFerias13o: false, custoFerias13o: 0 };
+                custosIndiretosPredefinidos = dadosPrecificacao.custosIndiretosPredefinidos || JSON.parse(JSON.stringify(custosIndiretosPredefinidosBase));
+                custosIndiretosAdicionais = dadosPrecificacao.custosIndiretosAdicionais || [];
+                produtos = dadosPrecificacao.produtos || [];
+                taxaCredito = dadosPrecificacao.taxaCredito || {percentual: 5, incluir: false};
+                margemLucroPadrao = dadosPrecificacao.margemLucroPadrao || 50;
+                novoCustoIndiretoCounter = dadosPrecificacao.novoCustoIndiretoCounter || 0;
+            }
+
+            // --- Atualiza a Interface ---
+            mostrarOrcamentosGerados();
+            mostrarPedidosRealizados();
+            alert("Dados carregados com sucesso do Firebase!");
+
+        } else {
+            // --- Se não houver dados do usuário no Firebase ---
+            alert("Nenhum dado encontrado no Firebase para este usuário.");
+              //NÃO faz nada. Mantém os dados da sessão, se existirem.
+        }
+    } catch (error) {
+        console.error("Erro ao carregar dados do Firebase:", error);
+        alert("Erro ao carregar dados: " + error.message);
+    }
+}
+/* ==== FIM SEÇÃO - Funções do Firebase (Salvar/Carregar) ==== */
+
+/* ==== INÍCIO SEÇÃO - Botão Limpar Página (Modificado) ==== */
+async function limparPagina() {  //Agora é assíncrona
+    if (confirm("Tem certeza que deseja limpar todos os dados da página? Esta ação é irreversível.")) {
+
+		const user = firebase.auth().currentUser;
+
+        // --- 1. Limpa os dados do Firebase (se houver usuário logado) ---
+		if(user){
+			try {
+				const userId = user.uid;
+				await db.collection("dados").doc(userId).delete(); // Apaga o documento do Firestore
+				alert("Dados apagados do Firebase com sucesso!");
+			} catch (error) {
+				console.error("Erro ao apagar dados do Firebase:", error);
+				alert("Erro ao apagar dados do Firebase: " + error.message);
+				return; // Sai da função se houver erro ao apagar do Firebase
+			}
+		}
+
+        // --- 2. Reseta as variáveis em memória ---
+        orcamentos = [];
+        pedidos = [];
+        numeroOrcamento = 1;
+        numeroPedido = 1;
+        materiais = [];
+		custosIndiretosPredefinidos = JSON.parse(JSON.stringify(custosIndiretosPredefinidosBase)); //Restaura o template.
+        custosIndiretosAdicionais = [];
+        produtos = [];
+        maoDeObra = { salario: 0, horas: 220, valorHora: 0, incluirFerias13o: false, custoFerias13o: 0 };
+        taxaCredito = {percentual: 5, incluir: false};
+        margemLucroPadrao = 50;
+        novoCustoIndiretoCounter = 0;
+
+
+        // --- 3. Limpa a interface ---
+        atualizarPainelUltimoBackup();
+        // alert("Todos os dados foram apagados."); // Já mostrou o alert do Firebase
+        mostrarPagina('form-orcamento');
+        const formOrcamento = document.getElementById("orcamento");
+        const formEdicaoPedido = document.getElementById("edicaoPedido");
+
+        if (formOrcamento) {
+            formOrcamento.reset();
+            limparCamposMoeda();
+            document.querySelector("#tabelaProdutos tbody").innerHTML = "";
+        }
+
+        if (formEdicaoPedido) {
+            formEdicaoPedido.reset();
+            limparCamposMoeda();
+            document.querySelector("#tabelaProdutosEdicao tbody").innerHTML = "";
+        }
+        if (document.getElementById("orcamentos-gerados").style.display === 'block') {
+            mostrarOrcamentosGerados();
+        }
+        if (document.getElementById("lista-pedidos").style.display === 'block') {
+            mostrarPedidosRealizados();
+        }
+    }
+}
+
+/* ==== FIM SEÇÃO - Botão Limpar Página (Modificado) ==== */
+
+/* ==== INÍCIO SEÇÃO - Chamadas Iniciais e Event Listeners ==== */
+// Carrega os dados do Firebase ao carregar a página (se o usuário estiver logado)
 document.addEventListener('DOMContentLoaded', () => {
-    carregarDados();
-    mostrarPagina('form-orcamento');
+
+	//Importante para carregar os custos indiretos predefinidos.
+	carregarCustosIndiretosPredefinidos();
+
+	//Verifica se tem usuário logado, e SÓ ENTÃO carrega os dados.
+	firebase.auth().onAuthStateChanged(user => {
+		if(user){
+			carregarDadosFirebase(); // Carrega os dados do Firebase
+		}
+	});
+
+	//O restante do seu código DOMContentLoaded...
+	mostrarPagina('form-orcamento');
     atualizarPainelUltimoBackup();
 });
-/* ==== FIM SEÇÃO - CARREGAR DADOS DO LOCALSTORAGE ==== */
+
+//Associando as funções aos botões.
+document.getElementById("btnGerarOrcamento").addEventListener('click', () => {
+	//Antes de gerar o orçamento, salva no firebase (se tiver usuário logado).
+	if(firebase.auth().currentUser){
+		salvarDadosFirebase().then(() => { //Chama salvarDadosFirebase e ESPERA terminar.
+			gerarOrcamento(); //SÓ ENTÃO chama gerarOrcamento().
+		});
+	} else{
+		gerarOrcamento(); //Se não tiver usuário logado, apenas gera o orçamento local.
+	}
+});
+
+document.getElementById("btnAtualizarOrcamento").addEventListener('click', () => {
+    if(firebase.auth().currentUser){
+        salvarDadosFirebase().then(atualizarOrcamento); //Salva e depois atualiza a interface.
+    } else {
+        atualizarOrcamento();
+    }
+});
+
+//Para o botão de atualizar pedido
+document.querySelector("#form-edicao-pedido button[type='button']").addEventListener('click', () => {
+    if(firebase.auth().currentUser) {
+        salvarDadosFirebase().then(atualizarPedido); //Mesma lógica: salva e *depois* atualiza.
+    } else {
+        atualizarPedido(); //Se não tiver login, apenas atualiza "localmente".
+    }
+});
+
+/* ==== FIM SEÇÃO - Chamadas Iniciais e Event Listeners ==== */
 
 /* ==== INÍCIO SEÇÃO - FUNÇÕES AUXILIARES ==== */
 function formatarMoeda(valor) {
@@ -193,8 +528,9 @@ function gerarOrcamento() {
 
     exibirOrcamentoEmHTML(orcamento);
 
-    exportarDados();
-    salvarDados();
+    //Removido daqui, agora salva no firebase ao clicar nos botões.
+    // exportarDados();
+    // salvarDados();
 
     document.getElementById("orcamento").reset();
     limparCamposMoeda();
@@ -456,8 +792,9 @@ function atualizarOrcamento() {
         });
     });
 
-    exportarDados();
-    salvarDados();
+    //Removido daqui, agora salva no firebase
+    // exportarDados();
+    // salvarDados();
 
     document.getElementById("orcamento").reset();
     limparCamposMoeda();
@@ -512,8 +849,9 @@ function gerarPedido(numeroOrcamento) {
 
     orcamento.pedidoGerado = true;
 
-    exportarDados();
-    salvarDados();
+    //Removido daqui. Agora salva no Firebase.
+    // exportarDados();
+    // salvarDados();
 
     alert(`Pedido Nº ${pedido.numero} gerado com sucesso a partir do orçamento Nº ${numeroOrcamento}!`);
     mostrarPagina('lista-pedidos');
@@ -683,8 +1021,9 @@ function atualizarPedido() {
     // ATUALIZANDO O PEDIDO NA LISTA
     pedidos[pedidoIndex] = pedidoAtualizado;
 
-    exportarDados();
-    salvarDados();
+    //removido daqui, agora salva no firebase
+    // exportarDados();
+    // salvarDados();
 
     alert("Pedido atualizado com sucesso!");
     mostrarPagina('lista-pedidos');
@@ -762,70 +1101,8 @@ function gerarRelatorioXLSX() {
 /* ==== FIM SEÇÃO - RELATÓRIO ==== */
 
 /* ==== INÍCIO SEÇÃO - IMPORTAR/EXPORTAR ==== */
-function exportarDados() {
-    const dadosParaExportar = JSON.stringify({ orcamentos, pedidos, numeroOrcamento, numeroPedido });
-    const blob = new Blob([dadosParaExportar], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+//Removendo as funções antigas de exportar/importar
 
-    const agora = new Date();
-    const ano = agora.getFullYear();
-    const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
-    const dia = agora.getDate().toString().padStart(2, '0');
-    const hora = agora.getHours().toString().padStart(2, '0');
-    const minuto = agora.getMinutes().toString().padStart(2, '0');
-    const nomeArquivo = `${ano}${mes}${dia}_${hora}${minuto}_Backup_Pérola_Rara.json`;
-
-    localStorage.setItem('ultimoBackup', JSON.stringify({ nomeArquivo, data: agora.toISOString() }));
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = nomeArquivo;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    atualizarPainelUltimoBackup();
-}
-
-function importarDados() {
-    const inputImportar = document.getElementById('inputImportar');
-    if (inputImportar.files.length > 0) {
-        const arquivo = inputImportar.files[0];
-        const nomeArquivo = arquivo.name;
-        const leitor = new FileReader();
-
-        leitor.onload = function(e) {
-            try {
-                const dadosImportados = JSON.parse(e.target.result);
-                orcamentos = dadosImportados.orcamentos || [];
-                pedidos = dadosImportados.pedidos || [];
-                numeroOrcamento = dadosImportados.numeroOrcamento || 1;
-                numeroPedido = dadosImportados.numeroPedido || 1;
-
-                salvarDados();
-
-                const match = nomeArquivo.match(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})/);
-                if (match) {
-                    const [, ano, mes, dia, hora, minuto] = match;
-                    const dataArquivo = new Date(`${ano}-${mes}-${dia}T${hora}:${minuto}`);
-                    localStorage.setItem('ultimoBackup', JSON.stringify({ nomeArquivo, data: dataArquivo.toISOString() }));
-                }
-
-                alert('Dados importados com sucesso!');
-                mostrarPagina('form-orcamento');
-                atualizarPainelUltimoBackup();
-            } catch (erro) {
-                alert('Erro ao importar dados: ' + erro.message);
-            }
-        };
-
-        leitor.readAsText(arquivo);
-    } else {
-        alert('Selecione um arquivo para importar.');
-    }
-}
 /* ==== FIM SEÇÃO - IMPORTAR/EXPORTAR ==== */
 
 /* ==== INÍCIO SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
@@ -835,13 +1112,14 @@ function atualizarPainelUltimoBackup() {
 
     if (ultimoBackup) {
         const data = new Date(ultimoBackup.data);
-        const dataFormatada = `${data.getDate().toString().padStart(2, '0')}/${(data.getMonth() + 1).toString().padStart(2, '0')}/${data.getFullYear()} ${data.getHours().toString().padStart(2, '0')}:${data.getMinutes().toString().padStart(2, '0')}`;
+        const dataFormatada = data.toLocaleString('pt-BR');
 
-        painel.innerHTML = `Último backup: ${dataFormatada}`;
+        painel.innerHTML = `Último backup: ${dataFormatada}`; // Atualiza a interface
     } else {
         painel.innerHTML = 'Nenhum backup encontrado';
     }
 }
+
 /* ==== FIM SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
 
 /* ==== INÍCIO SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
@@ -854,52 +1132,5 @@ function mostrarPagina(idPagina) {
     document.getElementById(idPagina).style.display = 'block';
 }
 
-function salvarDados() {
-    localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-    localStorage.setItem('pedidos', JSON.stringify(pedidos));
-    localStorage.setItem('numeroOrcamento', numeroOrcamento);
-    localStorage.setItem('numeroPedido', numeroPedido);
-}
-
-function carregarDados() {
-    orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
-    pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-    numeroOrcamento = parseInt(localStorage.getItem('numeroOrcamento')) || 1;
-    numeroPedido = parseInt(localStorage.getItem('numeroPedido')) || 1;
-}
-
-function limparPagina() {
-    if (confirm("Tem certeza que deseja limpar todos os dados da página? Esta ação é irreversível.")) {
-        localStorage.clear();
-        orcamentos = [];
-        pedidos = [];
-        numeroOrcamento = 1;
-        numeroPedido = 1;
-        atualizarPainelUltimoBackup();
-        alert("Todos os dados foram apagados.");
-        mostrarPagina('form-orcamento');
-
-        const formOrcamento = document.getElementById("orcamento");
-        const formEdicaoPedido = document.getElementById("edicaoPedido");
-
-        if (formOrcamento) {
-            formOrcamento.reset();
-            limparCamposMoeda();
-            document.querySelector("#tabelaProdutos tbody").innerHTML = "";
-        }
-
-        if (formEdicaoPedido) {
-            formEdicaoPedido.reset();
-            limparCamposMoeda();
-            document.querySelector("#tabelaProdutosEdicao tbody").innerHTML = "";
-        }
-
-        if (document.getElementById("orcamentos-gerados").style.display === 'block') {
-            mostrarOrcamentosGerados();
-        }
-        if (document.getElementById("lista-pedidos").style.display === 'block') {
-            mostrarPedidosRealizados();
-        }
-    }
-}
+//Removendo as funções antigas de salvar/carregar
 /* ==== FIM SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
