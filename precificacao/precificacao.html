@@ -29,7 +29,7 @@
 
 <!-- Seção Materiais e Insumos -->
 <section id="materiais-insumos" class="subpagina" style="display: none;">
-     <h2 id="titulo-materiais-insumos">Cadastro de Materiais e Insumos</h2>
+    <h2 id="titulo-materiais-insumos">Cadastro de Materiais e Insumos</h2>
     <form id="form-materiais-insumos">
         <div class="form-group">
             <label for="nome-material">Nome do Material:</label>
@@ -56,11 +56,13 @@
             <input type="number" id="peso-g" name="peso-g" step="0.01" value="1000">
         </div>
         <div class="form-group" id="campos-area" style="display: none;">
-            <label for="largura-cm">Largura (cm):</label>
-            <input type="number" id="largura-cm" name="largura-cm" step="0.01" value="100">
-            <label for="altura-cm">Altura (cm):</label>
-            <input type="number" id="altura-cm" name="altura-cm" step="0.01" value="100">
-        </div>
+            <label>Dimensões (cm):</label>
+            <div class="area-inputs">
+              <input type="number" id="largura-cm" name="largura-cm" step="0.01" value="100" placeholder="Largura">
+              <span>x</span>
+              <input type="number" id="altura-cm" name="altura-cm" step="0.01" value="100" placeholder="Altura">
+            </div>
+          </div>
         <div class="form-group">
             <label for="valor-total-material">Valor Total (R$):</label>
             <input type="number" id="valor-total-material" name="valor-total-material" step="0.01" required>
@@ -68,7 +70,6 @@
         <button type="button" onclick="cadastrarMaterialInsumo()">Cadastrar</button>
     </form>
     <h2>Materiais e Insumos Cadastrados</h2>
-    <!-- Campo de busca para Materiais e Insumos -->
     <div class="form-group">
         <input type="text" id="busca-material" placeholder="Buscar material..." onkeyup="buscarMateriaisCadastrados()">
     </div>
@@ -88,7 +89,7 @@
 
 <!-- Seção Mão de Obra -->
 <section id="mao-de-obra" class="subpagina" style="display: none;">
-   <h2 id="titulo-mao-de-obra">Informações sobre custo de mão de obra</h2>
+    <h2 id="titulo-mao-de-obra">Informações sobre custo de mão de obra</h2>
     <form id="form-mao-de-obra">
         <div class="form-group">
             <label for="salario-receber">Salário a receber (R$):</label>
@@ -103,12 +104,12 @@
             <input type="number" id="valor-hora" name="valor-hora" step="0.01" readonly>
         </div>
         <button type="button" onclick="salvarMaoDeObra()" id='btn-salvar-mao-de-obra'>Salvar</button>
-       <button type="button" onclick="editarMaoDeObra()" style="display:none;" id='btn-editar-mao-de-obra'>Editar</button>
+        <button type="button" onclick="editarMaoDeObra()" style="display:none;" id='btn-editar-mao-de-obra'>Editar</button>
 
         <hr class="linha-separadora">
 
         <h3 id="titulo-ferias-13o">Informações sobre custo de férias e 13º Salário</h3>
-         <div class="form-group">
+        <div class="form-group">
             <label>Deseja incluir o custo de férias e 13º salário?</label><br>
             <label><input type="checkbox" id="incluir-ferias-13o-sim" name="incluir-ferias-13o" value="sim"> Sim</label>
             <label><input type="checkbox" id="incluir-ferias-13o-nao" name="incluir-ferias-13o" value="nao" checked> Não</label>
@@ -124,7 +125,7 @@
 
 <!-- Seção Custos Indiretos -->
 <section id="custos-indiretos" class="subpagina" style="display: none;">
-    <h2 id="titulo-custos-indiretos">Cadastro de Custos Indiretos</h2>
+   <h2 id="titulo-custos-indiretos">Cadastro de Custos Indiretos</h2>
     <p style="text-align: center;">Custos indiretos são considerados para o período de um mês.</p>
 
     <ul id="lista-custos-indiretos">
@@ -133,7 +134,6 @@
     <button type="button" onclick="adicionarNovoCustoIndireto()">+ Adicionar Custo Indireto</button>
 
     <h2>Custos Indiretos Cadastrados</h2>
-    <!-- Campo de busca para Custos Indiretos -->
     <div class="form-group">
         <input type="text" id="busca-custo-indireto" placeholder="Buscar custo indireto..." onkeyup="buscarCustosIndiretosCadastrados()">
     </div>
@@ -152,9 +152,9 @@
 </section>
 
 
-<!-- Seção Produtos Cadastrados -->
+<!-- Seção Produtos Cadastrados (MODIFICADA) -->
 <section id="produtos-cadastrados" class="subpagina" style="display: none;">
-   <h2 id="titulo-novo-produto">Cadastro de Novo Produto</h2>
+    <h2 id="titulo-novo-produto">Cadastro de Novo Produto</h2>
     <form id="form-produtos-cadastrados">
         <div class="form-group">
             <label for="nome-produto">Nome do Produto:</label>
@@ -165,12 +165,22 @@
             <input type="text" id="pesquisa-material" name="pesquisa-material" placeholder="Pesquisar...">
             <div id="resultados-pesquisa"></div>
         </div>
+
+        <!--  *** AVISO ADICIONADO AQUI *** -->
+        <hr class="aviso-separador">
+        <p class="aviso-unidades">
+            <strong>Atenção:</strong> Ao adicionar materiais, preencha as dimensões em <span style="color: #5a8289;">centímetros (cm)</span> para materiais do tipo "Área" e "Comprimento".  Para os tipos "Litro", "Quilo" e "Unidade", insira a quantidade diretamente nas unidades correspondentes (L, kg, un).
+        </p>
+        <hr class="aviso-separador">
+        <!--  *** FIM DO AVISO *** -->
+
         <table id="tabela-materiais-produto" class="tabela-gerada">
             <thead>
                 <tr>
                     <th>Material/Insumo</th>
                     <th>Tipo</th>
                     <th>Custo Unitário</th>
+                    <th>Dimensões</th>
                     <th>Quantidade</th>
                     <th>Custo Total</th>
                     <th>Ações</th>
@@ -182,7 +192,6 @@
         <button type="button" onclick="cadastrarProduto()">Cadastrar Produto</button>
     </form>
     <h2>Produtos Cadastrados</h2>
-    <!-- Campo de busca para Produtos Cadastrados -->
     <div class="form-group">
         <input type="text" id="busca-produto" placeholder="Buscar produto..." onkeyup="buscarProdutosCadastrados()">
     </div>
@@ -266,6 +275,12 @@
             <span id="subtotal">R$ 0,00</span>
         </div>
 
+        <!-- Valor da Margem de Lucro -->
+        <div class="section">
+            <span>Margem de Lucro:</span>
+            <span id="margem-lucro-valor">R$ 0,00</span>
+        </div>
+
         <div class="section">
             <label for="margem-lucro-final">Margem de Lucro Desejada (%):</label>
             <input type="number" id="margem-lucro-final" name="margem-lucro-final" step="0.01" required value="0" onchange="calcularPrecoVendaFinal()">
@@ -275,6 +290,26 @@
             <span>Total (com Margem de Lucro):</span>
             <span id="total-final">R$ 0,00</span>
         </div>
+
+        <hr class="total-line">
+
+		<!-- Taxa de Compra a Crédito -->
+		<div class="section">
+			<span>Taxa de Compra a Crédito:</span>
+			<span id="taxa-credito-valor">R$ 0,00</span>
+		</div>
+		<div class="section">
+		    <label>Incluir taxa de crédito?</label>
+			<label><input type="checkbox" id="incluir-taxa-credito-sim" name="incluir-taxa-credito" value="sim"> Sim</label>
+			<label><input type="checkbox" id="incluir-taxa-credito-nao" name="incluir-taxa-credito" value="nao" checked> Não</label>
+			<input type="number" id="taxa-credito-percentual"  step="0.01" value = "6.00" style="width:60px; margin-left: 5px;">%
+			<button type="button" onclick="salvarTaxaCredito()">Salvar</button>
+		</div>
+
+		<div class="section total">
+			<span>Total Final (com Taxas):</span>
+			<span id="total-final-com-taxas">R$ 0,00</span>
+		</div>
     </div>
 </section>
 <!-- Fim da Seção Cálculo da Precificação -->
