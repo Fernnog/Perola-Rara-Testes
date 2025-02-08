@@ -7,7 +7,7 @@ const anoAtual = new Date().getFullYear();
 let orcamentoEditando = null; // Variável para controlar se está editando um orçamento
 
 //CHAVE SECRETA
-const CHAVE_SECRETA = "nzn8^*!ypvPMX7z^rZVN!NY8zMknZ#YFFPo";
+const CHAVE_SECRETA = "8zB84DTLu69w5qbQZS3eoUXLcTfmjemcw8oyfwDGnRyW2z5sSf";
 
 /* ==== FIM SEÇÃO - VARIÁVEIS GLOBAIS ==== */
 
