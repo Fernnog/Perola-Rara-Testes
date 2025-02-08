@@ -10,11 +10,28 @@
     <!-- Adicionando a biblioteca SheetJS (xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-	<!-- ==== Adicionado: Firebase SDK ==== -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <!-- ==== Fim da adição ==== -->
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGCs3T-fV-PlalDSz_dqN1BvzoxSwjv5U",
+            authDomain: "perola-rara-ae5bc.firebaseapp.com",
+            projectId: "perola-rara-ae5bc",
+            storageBucket: "perola-rara-ae5bc.firebasestorage.app",
+            messagingSenderId: "968229137782",
+            appId: "1:968229137782:web:682d4e0e851bf0e3f41e57",
+            measurementId: "G-D0KYCNJW4P"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    </script>
 
     <script src="./script.js"></script>
 </head>
@@ -38,35 +55,12 @@
         <li><a href="#" onclick="mostrarPagina('lista-pedidos'); mostrarPedidosRealizados()">Pedidos Realizados</a></li>
         <li><a href="#" onclick="mostrarPagina('relatorio')">Relatório</a></li>
         <li><a href="precificacao/precificacao.html">Precificação</a></li>
-        <li><a href="#" onclick="limparPagina()">Limpar Página</a></li> <!-- Removido backup -->
+        <li><a href="#" onclick="limparPagina()">Limpar Página</a></li>
     </ul>
 </nav>
             <hr class="menu">
         </header>
         <!-- ==== FIM SEÇÃO - CABEÇALHO ==== -->
-
-		<!-- ==== Adicionado: Seção de Login/Cadastro ==== -->
-        <div id="auth-container">
-            <h2>Login / Cadastro</h2>
-            <div id="auth-message" style="color: red;"></div>
-
-            <div id="login-form">
-                <label for="email">Email:</label>
-                <input type="email" id="email" placeholder="Digite seu email">
-
-                <label for="password">Senha:</label>
-                <input type="password" id="password" placeholder="Digite sua senha">
-
-                <button id="btn-login">Entrar</button>
-                <button id="btn-register">Cadastrar</button>
-            </div>
-
-            <div id="logged-in-message" style="display: none;">
-                <p>Você está logado como: <span id="user-email"></span></p>
-                <button id="btn-logout">Sair</button>
-            </div>
-        </div>
-		<!-- ==== Fim da adição ==== -->
 
         <!-- ==== INÍCIO SEÇÃO - FORMULÁRIO DE ORÇAMENTO ==== -->
         <section id="form-orcamento" class="pagina">
