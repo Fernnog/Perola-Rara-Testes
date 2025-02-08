@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<!-- ==== INÍCIO SEÇÃO - HEAD ==== -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pérola Rara - Gerenciamento de Pedidos</title>
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Adicionando a biblioteca SheetJS (xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "G-D0KYCNJW4P" // Mantive o measurementId, caso esteja usando Analytics
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+    </script>
+
+    <script src="./script.js"></script>
+</head>
+<!-- ==== FIM SEÇÃO - HEAD ==== -->
+<body>
+
+    <!-- ==== INÍCIO SEÇÃO - LOGIN ==== -->
+    <section id="login-section" style="display: none;">
+        <h2>Login</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="login-email">Email:</label>
+                <input type="email" id="login-email" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Senha:</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <button type="submit">Entrar</button>
+            <button type="button" id="btn-create-account">Criar Conta</button> <!-- Botão para criar conta -->
+        </form>
+        <div id="login-message"></div> <!-- Para exibir mensagens de erro/sucesso -->
+    </section>
+    <!-- ==== FIM SEÇÃO - LOGIN ==== -->
+
+    <div class="container">
+        <!-- ==== INÍCIO SEÇÃO - CABEÇALHO ==== -->
+        <header>
+            <div class="top-bar">
+                <div id="ultimoBackupFirebase" class="ultimo-backup"></div>
+            </div>
+            <div class="logo-container">
+                <img src="./logo_perola_rara.png" alt="Logo Pérola Rara" id="logo">
+            </div>
+            <h1>Pérola Rara</h1>
+            <hr class="titulo">
+          <nav>
+    <ul>
+        <li><a href="#" onclick="mostrarPagina('form-orcamento')">Início</a></li>
+        <li><a href="#" onclick="mostrarPagina('orcamentos-gerados'); mostrarOrcamentosGerados()">Orçamentos Gerados</a></li>
+        <li><a href="#" onclick="mostrarPagina('lista-pedidos'); mostrarPedidosRealizados()">Pedidos Realizados</a></li>
+        <li><a href="#" onclick="mostrarPagina('relatorio')">Relatório</a></li>
+        <li><a href="precificacao/precificacao.html">Precificação</a></li>
+        <li><a href="#" onclick="mostrarPagina('backup');">Importar/Exportar</a></li>
+        <!-- REMOVIDO O MENU LIMPAR PÁGINA -->
+    </ul>
+</nav>
+            <hr class="menu">
+        </header>
+        <!-- ==== FIM SEÇÃO - CABEÇALHO ==== -->
+
+        <!-- ==== INÍCIO SEÇÃO - FORMULÁRIO DE ORÇAMENTO ==== -->
+        <!-- ... (restante do seu HTML - FORMULÁRIO DE ORÇAMENTO até o FIM) ... -->
+        <!-- ... (sem alterações nessa parte do HTML) ... -->
+         <!-- ==== FIM SEÇÃO - VISUALIZAR ORÇAMENTO ==== -->
+        </section>
+        <!-- ==== FIM SEÇÃO - VISUALIZAR ORÇAMENTO ==== -->
+    </div>
+</body>
+</html>
