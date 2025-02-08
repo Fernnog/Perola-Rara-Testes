@@ -1,0 +1,75 @@
+/* ==== INÍCIO SEÇÃO - GOOGLE FONTS ==== */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+/* ==== FIM SEÇÃO - GOOGLE FONTS ==== */
+
+/* ==== INÍCIO SEÇÃO - ESTILOS GERAIS ==== */
+/* ... (restante do seu CSS - ESTILOS GERAIS até o MEDIA QUERIES) ... */
+/* ... (sem alterações nessa parte do CSS) ... */
+/* ==== FIM SEÇÃO - MEDIA QUERIES ==== */
+
+/* ==== INÍCIO SEÇÃO - LOGIN ==== */
+/* Estilos para a seção de login */
+#login-section {
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f8f8f8;
+}
+
+#login-section h2 {
+    color: #7aa2a9;
+    margin-bottom: 15px;
+}
+
+#login-form .form-group {
+    margin-bottom: 10px;
+}
+
+#login-form label {
+    display: block;
+    font-weight: bold;
+}
+
+#login-form input[type="email"],
+#login-form input[type="password"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 16px;
+    background-color: #dfb6b0;
+    color: #fff;
+}
+
+#login-form button {
+    background-color: #7aa2a9;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#login-form button:hover {
+    background-color: #5a8289;
+}
+
+#login-message {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* Mensagens de erro em vermelho */
+#login-message.error {
+    color: red;
+}
+
+/* Mensagens de sucesso em verde */
+#login-message.success {
+    color: green;
+}
+/* ==== FIM SEÇÃO - LOGIN ==== */
