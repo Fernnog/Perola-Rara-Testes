@@ -9,6 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Adicionando a biblioteca SheetJS (xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+	<!-- ==== Adicionado: Firebase SDK ==== -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <!-- ==== Fim da adição ==== -->
+
     <script src="./script.js"></script>
 </head>
 <!-- ==== FIM SEÇÃO - HEAD ==== -->
@@ -31,13 +38,35 @@
         <li><a href="#" onclick="mostrarPagina('lista-pedidos'); mostrarPedidosRealizados()">Pedidos Realizados</a></li>
         <li><a href="#" onclick="mostrarPagina('relatorio')">Relatório</a></li>
         <li><a href="precificacao/precificacao.html">Precificação</a></li>
-        <li><a href="#" onclick="mostrarPagina('backup');">Importar/Exportar</a></li>
-        <li><a href="#" onclick="limparPagina()">Limpar Página</a></li>
+        <li><a href="#" onclick="limparPagina()">Limpar Página</a></li> <!-- Removido backup -->
     </ul>
 </nav>
             <hr class="menu">
         </header>
         <!-- ==== FIM SEÇÃO - CABEÇALHO ==== -->
+
+		<!-- ==== Adicionado: Seção de Login/Cadastro ==== -->
+        <div id="auth-container">
+            <h2>Login / Cadastro</h2>
+            <div id="auth-message" style="color: red;"></div>
+
+            <div id="login-form">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="Digite seu email">
+
+                <label for="password">Senha:</label>
+                <input type="password" id="password" placeholder="Digite sua senha">
+
+                <button id="btn-login">Entrar</button>
+                <button id="btn-register">Cadastrar</button>
+            </div>
+
+            <div id="logged-in-message" style="display: none;">
+                <p>Você está logado como: <span id="user-email"></span></p>
+                <button id="btn-logout">Sair</button>
+            </div>
+        </div>
+		<!-- ==== Fim da adição ==== -->
 
         <!-- ==== INÍCIO SEÇÃO - FORMULÁRIO DE ORÇAMENTO ==== -->
         <section id="form-orcamento" class="pagina">
@@ -342,21 +371,6 @@
             <button type="button" onclick="gerarRelatorioXLSX()">Exportar Relatório (XLSX)</button>
         </section>
         <!-- ==== FIM SEÇÃO - RELATÓRIO ==== -->
-
-        <!-- ==== INÍCIO SEÇÃO - IMPORTAR EXPORTAR ==== -->
-        <section id="backup" class="pagina" style="display:none;">
-            <h2>Importar e Exportar Dados</h2>
-
-            <div>
-                <input type="file" id="inputImportar" accept=".json">
-                <button type="button" onclick="importarDados()">Importar Dados</button>
-            </div>
-
-            <div>
-                <button type="button" onclick="exportarDados()">Exportar Dados</button>
-            </div>
-        </section>
-        <!-- ==== FIM SEÇÃO - IMPORTAR EXPORTAR ==== -->
 
         <!-- ==== INÍCIO SEÇÃO - VISUALIZAR ORÇAMENTO ==== -->
         <section id="visualizar-orcamento" class="pagina" style="display:none;">
