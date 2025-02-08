@@ -7,7 +7,7 @@ const anoAtual = new Date().getFullYear();
 let orcamentoEditando = null; // Variável para controlar se está editando um orçamento
 
 //CHAVE SECRETA
-const CHAVE_SECRETA = "8zB84DTLu69w5qbQZS3eoUXLcTfmjemcw8oyfwDGnRyW2z5sSf";
+const CHAVE_SECRETA = "nzn8^*!ypvPMX7z^rZVN!NY8zMknZ#YFFPo";
 
 /* ==== FIM SEÇÃO - VARIÁVEIS GLOBAIS ==== */
 
@@ -806,10 +806,10 @@ function carregarDados() {
                 //Dados da precificação
                 materiais = dados.materiais || [];
                 maoDeObra = dados.maoDeObra || { salario: 0, horas: 220, valorHora: 0, incluirFerias13o: false, custoFerias13o: 0 };
-                custosIndiretosPredefinidos = dados.custosIndiretosPredefinidos || JSON.parse(JSON.stringify(custosIndiretosPredefinidosBase));
+                custosIndiretosPredefinidos = dados.custosIndiretosPredefinidos || JSON.parse(JSON.stringify(window.custosIndiretosPredefinidosBase)); // Usando window.
                 custosIndiretosAdicionais = dados.custosIndiretosAdicionais || [];
                 produtos = dados.produtos || [];
-                taxaCredito = dados.taxaCredito || {percentual: 6, incluir: false};
+                taxaCredito = dados.taxaCredito || { percentual: 6, incluir: false };
 
 
                 // Atualiza a interface com os dados carregados
@@ -848,7 +848,7 @@ function carregarDadosLocais() {
     //Dados da precificação
     materiais = JSON.parse(localStorage.getItem('materiais')) || [];
     maoDeObra = JSON.parse(localStorage.getItem('maoDeObra')) || { salario: 0, horas: 220, valorHora: 0, incluirFerias13o: false, custoFerias13o: 0 };
-    custosIndiretosPredefinidos = JSON.parse(localStorage.getItem('custosIndiretosPredefinidos')) || JSON.parse(JSON.stringify(custosIndiretosPredefinidosBase));
+    custosIndiretosPredefinidos = JSON.parse(localStorage.getItem('custosIndiretosPredefinidos')) || JSON.parse(JSON.stringify(window.custosIndiretosPredefinidosBase)); // usando window.
     custosIndiretosAdicionais = JSON.parse(localStorage.getItem('custosIndiretosAdicionais')) || [];
     produtos = JSON.parse(localStorage.getItem('produtos')) || [];
     taxaCredito = JSON.parse(localStorage.getItem('taxaCredito')) || { percentual: 6, incluir: false };
@@ -917,7 +917,7 @@ function limparPagina() {
                     // Limpa variáveis da precificação
                     materiais = [];
                     maoDeObra = { salario: 0, horas: 220, valorHora: 0, incluirFerias13o: false, custoFerias13o: 0 };
-                    custosIndiretosPredefinidos = JSON.parse(JSON.stringify(custosIndiretosPredefinidosBase));
+                    custosIndiretosPredefinidos = JSON.parse(JSON.stringify(window.custosIndiretosPredefinidosBase)); // usando window.
                     custosIndiretosAdicionais = [];
                     produtos = [];
                     taxaCredito = { percentual: 6, incluir: false };
