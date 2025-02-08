@@ -221,13 +221,48 @@ td {
     background-color: #f0f0f0;
 }
 
-/* Estilos para a tabela de materiais do produto */
+/* Estilos para a tabela de materiais do produto (AJUSTADO) */
 #tabela-materiais-produto {
     margin-bottom: 20px;
 }
 
-#tabela-materiais-produto td input {
-    width: 80px;
+#tabela-materiais-produto th,
+#tabela-materiais-produto td {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+/*Para a tabela de produtos, ajustamos para a coluna de dimensões genérica */
+#tabela-materiais-produto th:nth-child(4),
+#tabela-materiais-produto td:nth-child(4) {
+    width: auto; /* Removemos a largura fixa, deixamos automático */
+}
+
+#tabela-materiais-produto th:nth-child(5), /* Coluna quantidade */
+#tabela-materiais-produto td:nth-child(5) {
+    width: 100px; /* Ajuste conforme necessário */
+}
+
+/* --- ADICIONADO: Estilos para inputs de área --- */
+.dimensoes-input {
+    width: 60px !important;
+    margin-right: 5px !important;
+}
+.dimensoes-span{
+    font-weight: bold;
+    margin-left: 5px;
+}
+.quantidade-input {
+  width: 60px !important; /* Ou ajuste conforme necessário */
+}
+
+
+/* --- ADICIONADO: Estilo para a unidade de medida --- */
+.unidade-medida {
+    margin-left: 5px;
+    font-size: 0.9em;
+    color: #555;
 }
 
 /* Estilo para o campo valor-hora (e agora custo-ferias-13o) */
@@ -337,6 +372,13 @@ td {
   margin: 15px 0;
 }
 
+/* --- ADICIONADO: Linha para o total --- */
+.total-line {
+  width: 100%;
+  border-top: 2px solid #7aa2a9;
+  margin: 15px 0;
+}
+
 .subtotal, .total{
   font-weight: bold;
   font-size: 1.1em;
@@ -420,4 +462,40 @@ td {
 
 .custo-detalhe span:first-child {
   margin-right: 10px; /*Espaço entre o nome e os : */
+}
+
+/* Estilo para inputs de área (melhor legibilidade) */
+.area-inputs {
+    display: flex;
+    align-items: center; /* Alinha verticalmente */
+}
+
+.area-inputs input {
+    margin-right: 5px;
+    width: 70px; /* Largura controlada */
+}
+.area-inputs span {
+  font-size: 1.2em; /* Aumenta um pouco o 'x' */
+  font-weight: bold; /* Deixa em negrito para destacar*/
+  margin-right: 5px; /* Dá um pequeno espaço à direita */
+}
+
+/* Estilos para o aviso de unidades */
+.aviso-separador {
+  border: none;
+  border-top: 1px dashed #7aa2a9;  /* Linha tracejada, cor da paleta */
+  margin: 10px 0; /* Espaçamento acima e abaixo */
+  width: 80%;    /* Largura */
+  margin-left: auto;  /* Centraliza */
+  margin-right: auto; /* Centraliza */
+}
+
+.aviso-unidades {
+  text-align: center;
+  font-size: 0.9em;      /* Tamanho da fonte um pouco menor */
+  color: #555;         /* Cor do texto mais suave */
+  margin-bottom: 20px;    /* Espaçamento abaixo do aviso */
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
 }
