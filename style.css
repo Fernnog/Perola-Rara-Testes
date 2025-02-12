@@ -97,19 +97,19 @@ nav ul li {
 nav ul li a {
     color: #7aa2a9;
     text-decoration: none;
+    display: inline-block; /* Melhor para aplicar padding e transição */
+    padding: 10px 15px; /* Aumentei um pouco o padding */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Transição suave para cor também */
+    border-radius: 5px; /* Bordas levemente arredondadas (opcional) */
+}
+
+nav ul li a:hover { /* Estilo de hover aprimorado */
+    background-color: #e8d7d4; /* Rosa do precificacao.css */
+    color: #333; /* Escurece a cor do texto no hover (melhor contraste) */
 }
 /* ==== FIM SEÇÃO - CABEÇALHO (PÁGINA PRINCIPAL) ==== */
 
-/* ==== INÍCIO SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
-.ultimo-backup {
-    font-size: 0.8em; /* Tamanho da fonte menor para não chamar muita atenção */
-    color: #666; /* Cor cinza, menos proeminente que o texto principal */
-    padding: 5px 10px; /* Espaçamento interno para o texto respirar */
-    border: 1px solid #ccc; /* Borda fina e cinza clara */
-    border-radius: 5px; /* Cantos arredondados para um visual mais suave */
-    background-color: #f5f5f5; /* Fundo cinza claro, levemente diferente do fundo da página */
-}
-/* ==== FIM SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
+/* ==== REMOVIDO - SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
 
 /* ==== INÍCIO SEÇÃO - FORMULÁRIO ==== */
 #form-orcamento, #form-edicao-pedido {
@@ -283,75 +283,18 @@ button:hover {
 /* ==== FIM SEÇÃO - PÁGINA DE VISUALIZAÇÃO DO ORÇAMENTO (orcamento.html) ==== */
 
 /* ==== INÍCIO SEÇÃO - BOTÃO LIMPAR PÁGINA ==== */
-/* REMOVIDOS OS ESTILOS DO BOTÃO LIMPAR PÁGINA */
+nav ul li a[onclick="limparPagina()"] {
+    background-color: #dfb6b0; /* Fundo rosa delicado */
+    padding: 5px 10px; /* Espaçamento interno */
+    border-radius: 10px; /* Bordas arredondadas */
+    color: white; /* Texto branco para contraste */
+    margin-left: 20px; /* Espaço à esquerda para separar dos outros botões */
+}
+
+nav ul li a[onclick="limparPagina()"]:hover {
+    background-color: #c89790; /* Tom mais escuro de rosa no hover */
+}
 /* ==== FIM SEÇÃO - BOTÃO LIMPAR PÁGINA ==== */
-
-/* ==== INÍCIO SEÇÃO - LOGIN ==== */
-/* Estilos para a seção de login */
-#login-section {
-    text-align: center;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    padding: 20px;
-    border-radius: 10px;
-    background-color: #f8f8f8;
-}
-
-#login-section h2 {
-    color: #7aa2a9;
-    margin-bottom: 15px;
-}
-
-#login-form .form-group {
-    margin-bottom: 10px;
-}
-
-#login-form label {
-    display: block;
-    font-weight: bold;
-}
-
-#login-form input[type="email"],
-#login-form input[type="password"] {
-    width: calc(100% - 22px);
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    font-size: 16px;
-    background-color: #dfb6b0;
-    color: #fff;
-}
-
-#login-form button {
-    background-color: #7aa2a9;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-#login-form button:hover {
-    background-color: #5a8289;
-}
-
-#login-message {
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-/* Mensagens de erro em vermelho */
-#login-message.error {
-    color: red;
-}
-
-/* Mensagens de sucesso em verde */
-#login-message.success {
-    color: green;
-}
-/* ==== FIM SEÇÃO - LOGIN ==== */
 
 /* ==== INÍCIO SEÇÃO - MEDIA QUERIES ==== */
 @media (max-width: 768px) {
@@ -370,3 +313,10 @@ button:hover {
     }
 }
 /* ==== FIM SEÇÃO - MEDIA QUERIES ==== */
+
+/* ==== INÍCIO SEÇÃO - ESTILOS ADICIONADOS PARA CUSTO E MARGEM ==== */
+.form-row.valores-pedido label {
+    color: #7aa2a9;
+    font-weight: bold;
+}
+/* ==== FIM SEÇÃO - ESTILOS ADICIONADOS PARA CUSTO E MARGEM ==== */
