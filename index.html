@@ -22,21 +22,20 @@
             <hr class="titulo">
             <nav>
                 <ul>
-                    <li><a href="#" onclick="mostrarPagina('form-orcamento')">Início</a></li>
-                    <li><a href="#" onclick="mostrarPagina('orcamentos-gerados'); mostrarOrcamentosGerados()">Orçamentos Gerados</a></li>
-                    <li><a href="#" onclick="mostrarPagina('lista-pedidos'); mostrarPedidosRealizados()">Pedidos Realizados</a></li>
-                    <li><a href="#" onclick="mostrarPagina('relatorio')">Relatório</a></li>
-                    <!-- REMOVIDO o link Limpar Página -->
+                    <li><a href="#" id="link-form-orcamento">Início</a></li>
+                    <li><a href="#" id="link-orcamentos-gerados">Orçamentos Gerados</a></li>
+                    <li><a href="#" id="link-lista-pedidos">Pedidos Realizados</a></li>
+                    <li><a href="#" id="link-relatorio">Relatório</a></li>
                 </ul>
             </nav>
             <hr class="menu">
         </header>
         <!-- ==== FIM SEÇÃO - CABEÇALHO ==== -->
 
-        <!-- Seção de Autenticação (Inicialmente oculta) -->
+       <!-- Seção de Autenticação (Inicialmente oculta) -->
         <div id="authSection" style="display: none; text-align: center; margin-bottom: 20px;">
-            <input type="email" id="email" placeholder="Email" style="margin-bottom: 10px;">
-            <input type="password" id="password" placeholder="Senha" style="margin-bottom: 10px;">
+            <input type="email" id="emailAuth" placeholder="Email" style="margin-bottom: 10px;">  <!-- ID alterado -->
+            <input type="password" id="passwordAuth" placeholder="Senha" style="margin-bottom: 10px;"> <!-- ID alterado -->
             <div>
                 <button id="btnRegister">Registrar</button>
                 <button id="btnLogin">Entrar</button>
@@ -45,7 +44,7 @@
             <p id="authStatus">Nenhum usuário autenticado</p>
             <hr>
         </div>
-      
+
       <!-- ==== Adicionado após Seção de Autenticação ==== -->
         <div id="appContent" style="display: block;">
 
@@ -191,37 +190,37 @@
         <!-- ==== FIM SEÇÃO - ORÇAMENTOS GERADOS ==== -->
 
       <!-- ==== INÍCIO SEÇÃO - LISTA DE PEDIDOS ==== -->
-<section id="lista-pedidos" class="pagina" style="display:none;">
-    <h2>Pedidos Realizados</h2>
-    <div class="filtro-data">
-        <label for="filtroDataInicioPedido">Início:</label>
-        <input type="date" id="filtroDataInicioPedido">
-        <label for="filtroDataFimPedido">Fim:</label>
-        <input type="date" id="filtroDataFimPedido">
-        <label for="filtroNumeroPedido">Número:</label>
-        <input type="number" id="filtroNumeroPedido" placeholder="Número do Pedido">
-        <label for="filtroAnoPedido">Ano:</label>
-        <input type="number" id="filtroAnoPedido" placeholder="Ano do Pedido">
-        <label for="filtroClientePedido">Cliente:</label>
-        <input type="text" id="filtroClientePedido" placeholder="Parte do nome do Cliente">
-        <button type="button" onclick="filtrarPedidos()">Filtrar</button>
-    </div>
-    <table id="tabela-pedidos">
-        <thead>
-            <tr>
-                <th>Número</th>
-                <th>Data do Pedido</th>
-                <th>Cliente</th>
-                <th>Total</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Linhas de pedidos serão adicionadas aqui -->
-        </tbody>
-    </table>
-</section>
-<!-- ==== FIM SEÇÃO - LISTA DE PEDIDOS ==== -->
+        <section id="lista-pedidos" class="pagina" style="display:none;">
+            <h2>Pedidos Realizados</h2>
+            <div class="filtro-data">
+                <label for="filtroDataInicioPedido">Início:</label>
+                <input type="date" id="filtroDataInicioPedido">
+                <label for="filtroDataFimPedido">Fim:</label>
+                <input type="date" id="filtroDataFimPedido">
+                <label for="filtroNumeroPedido">Número:</label>
+                <input type="number" id="filtroNumeroPedido" placeholder="Número do Pedido">
+                <label for="filtroAnoPedido">Ano:</label>
+                <input type="number" id="filtroAnoPedido" placeholder="Ano do Pedido">
+                <label for="filtroClientePedido">Cliente:</label>
+                <input type="text" id="filtroClientePedido" placeholder="Parte do nome do Cliente">
+                <button type="button" onclick="filtrarPedidos()">Filtrar</button>
+            </div>
+            <table id="tabela-pedidos">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Data do Pedido</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Linhas de pedidos serão adicionadas aqui -->
+                </tbody>
+            </table>
+        </section>
+        <!-- ==== FIM SEÇÃO - LISTA DE PEDIDOS ==== -->
 
         <!-- ==== INÍCIO SEÇÃO - FORMULÁRIO DE EDIÇÃO DE PEDIDO ==== -->
         <section id="form-edicao-pedido" class="pagina" style="display:none;">
@@ -359,8 +358,6 @@
         </section>
         <!-- ==== FIM SEÇÃO - RELATÓRIO ==== -->
 
-        <!-- ==== REMOVIDA A SEÇÃO - IMPORTAR EXPORTAR ==== -->
-
         <!-- ==== INÍCIO SEÇÃO - VISUALIZAR ORÇAMENTO ==== -->
         <section id="visualizar-orcamento" class="pagina" style="display:none;">
             <div class="header-orcamento">
@@ -376,5 +373,31 @@
         <!-- ==== FIM SEÇÃO - VISUALIZAR ORÇAMENTO ==== -->
         </div><!-- Fechamento da div appContent -->
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('link-form-orcamento').addEventListener('click', function(event) {
+            event.preventDefault(); // Impede o comportamento padrão do link
+            mostrarPagina('form-orcamento');
+        });
+
+        document.getElementById('link-orcamentos-gerados').addEventListener('click', function(event) {
+            event.preventDefault();
+            mostrarPagina('orcamentos-gerados');
+            mostrarOrcamentosGerados();
+        });
+
+        document.getElementById('link-lista-pedidos').addEventListener('click', function(event) {
+            event.preventDefault();
+            mostrarPagina('lista-pedidos');
+            mostrarPedidosRealizados();
+        });
+
+        document.getElementById('link-relatorio').addEventListener('click', function(event) {
+            event.preventDefault();
+            mostrarPagina('relatorio');
+        });
+    });
+    </script>
 </body>
 </html>
