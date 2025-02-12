@@ -684,9 +684,7 @@ async function gerarPedido(orcamentoId) {
         alert("Pedido já foi gerado.");
         return;
     }
-
-    const pedido = {
-       numero: gerarNumeroFormatado(numeroPedido),
+        numero: gerarNumeroFormatado(numeroPedido),
         dataPedido: new Date().toISOString().split('T')[0],
         dataEntrega: orcamento.dataValidade,
         cliente: orcamento.cliente,
@@ -714,7 +712,7 @@ async function gerarPedido(orcamentoId) {
     };
     delete pedido.dataValidade;
 
-       // Salvar *antes* de atualizar a interface, usando await
+    // Salvar *antes* de atualizar a interface, usando await
     await salvarDados(pedido, 'pedido');
     numeroPedido++; // Incrementa *após* salvar
     pedidos.push(pedido); // Adiciona ao array local *após* salvar
@@ -882,7 +880,7 @@ async function atualizarPedido() {
 
     const pedidoAtualizado = {
         id: pedido.id, // Find by ID
-        numero: document.getElementById("dataPedidoEdicao").value,
+        numero: document.getElementById("numeroEdicao").value, //Aqui estava errado
         dataPedido: document.getElementById("dataPedidoEdicao").value,
         dataEntrega: document.getElementById("dataEntregaEdicao").value,
         cliente: document.getElementById("clienteEdicao").value,
@@ -1004,3 +1002,4 @@ function mostrarPagina(idPagina) {
 }
 
 /* ==== FIM SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
+    
