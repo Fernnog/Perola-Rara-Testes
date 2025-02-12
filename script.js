@@ -1,7 +1,7 @@
 /* ==== INÍCIO - Configuração e Inicialização do Firebase ==== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
-import { getFirestore, collection, addDoc, getDocs, doc, setDoc, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"; // Import *deleteDoc*
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -26,8 +26,8 @@ let numeroOrcamento = 1;
 let numeroPedido = 1;
 const anoAtual = new Date().getFullYear();
 let orcamentoEditando = null;
-let orcamentos = []; // Array para armazenar orçamentos
-let pedidos = [];    // Array para armazenar pedidos
+let orcamentos = [];
+let pedidos = [];
 let usuarioAtual = null; // Armazena o usuário logado
 /* ==== FIM SEÇÃO - VARIÁVEIS GLOBAIS ==== */
 
@@ -37,10 +37,11 @@ const btnRegister = document.getElementById('btnRegister');
 const btnLogin = document.getElementById('btnLogin');
 const btnLogout = document.getElementById('btnLogout');
 const authStatus = document.getElementById('authStatus');
-const emailInput = document.getElementById('email'); //Mesmo ID no HTML
-const passwordInput = document.getElementById('password'); //Mesmo ID no HTML
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
 const authSection = document.getElementById('authSection');
 const appContent = document.getElementById('appContent'); //Para mostrar Sections
+
 
 // Função para lidar com a interface de autenticação
 function updateAuthUI(user) {
@@ -61,7 +62,7 @@ function updateAuthUI(user) {
         btnRegister.style.display = "inline-block";
         authSection.style.display = "block";  //Sempre mostrar
         appContent.style.display = "none"; // Ocultar conteúdo principal
-
+        
         // Limpar os dados se o usuário fizer logout.
         orcamentos = [];
         pedidos = [];
@@ -126,16 +127,17 @@ onAuthStateChanged(auth, (user) => {
 
 /* ==== FIM SEÇÃO - AUTENTICAÇÃO ==== */
 
-
 /* ==== INÍCIO SEÇÃO - CARREGAR DADOS DO FIREBASE ==== */
 async function carregarDados() {
     if (!usuarioAtual) {
+        // Se não tiver usuário, não carrega nada.
         return;
     }
 
     try {
-        orcamentos = []; // Limpa os arrays antes de recarregar
+        orcamentos = [];
         pedidos = [];
+        // Consulta com ordenação
         const q = query(orcamentosPedidosRef, orderBy("numero"));
         const snapshot = await getDocs(q);
 
@@ -145,32 +147,26 @@ async function carregarDados() {
 
             if (data.tipo === 'orcamento') {
                 orcamentos.push(data);
-                // Correção:  Incrementa o número *após* carregar, não antes
                 numeroOrcamento = Math.max(numeroOrcamento, parseInt(data.numero.split('/')[0]) + 1);
             } else if (data.tipo === 'pedido') {
                 pedidos.push(data);
                 numeroPedido = Math.max(numeroPedido, parseInt(data.numero.split('/')[0]) + 1);
             }
         });
-
-        console.log("Dados carregados:", orcamentos, pedidos);
-        mostrarOrcamentosGerados(); // Atualiza a exibição *após* carregar
+        console.log("Dados carregados do Firebase:", orcamentos, pedidos);
+        mostrarOrcamentosGerados();
         mostrarPedidosRealizados();
 
     } catch (error) {
-        console.error("Erro ao carregar:", error);
-        alert("Erro ao carregar dados. Veja o console.");
+        console.error("Erro ao carregar dados do Firebase:", error);
+        alert("Erro ao carregar dados do Firebase. Veja o console para detalhes.");
     }
 }
+
 /* ==== FIM SEÇÃO - CARREGAR DADOS DO FIREBASE ==== */
 
 /* ==== INÍCIO SEÇÃO - FUNÇÕES AUXILIARES ==== */
 function formatarMoeda(valor) {
-    // Certifique-se de que valor é um número antes de formatar
-    if (typeof valor !== 'number') {
-      console.warn("formatarMoeda recebeu um valor não numérico:", valor);
-      return "R$ 0,00";  // Ou outra string padrão apropriada
-    }
     return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
@@ -302,38 +298,39 @@ function gerarNumeroFormatado(numero) {
 
 /* ==== FIM DA SEÇÃO - FUNÇÕES AUXILIARES ==== */
 
-/* ==== INÍCIO SEÇÃO - SALVAR DADOS NO FIREBASE ==== */
+/* ==== INÍCIO SEÇÃO - SALVAR DADOS NO FIREBASE (COM VERIFICAÇÃO DE AUTENTICAÇÃO) ==== */
 async function salvarDados(dados, tipo) {
     if (!usuarioAtual) {
-        alert("Você precisa estar autenticado.");
-        return;
+        alert("Você precisa estar autenticado para salvar dados.");
+        return; // Não salva se não estiver autenticado
     }
     try {
         if (dados.id) {
-             const docRef = doc(orcamentosPedidosRef, dados.id);
-            await setDoc(docRef, dados, { merge: true }); // Atualiza
-            console.log("Dados atualizados, ID:", dados.id);
+            const docRef = doc(orcamentosPedidosRef, dados.id);
+            await setDoc(docRef, dados, { merge: true });
+            console.log("Dados atualizados no Firebase com ID:", dados.id);
         } else {
-            const docRef = await addDoc(orcamentosPedidosRef, { ...dados, tipo }); // Cria
-            console.log("Novos dados salvos, ID:", docRef.id);
-            dados.id = docRef.id; // Importante:  Atribui o ID gerado ao objeto
+            const docRef = await addDoc(orcamentosPedidosRef, { ...dados, tipo });
+            console.log("Novos dados salvos no Firebase com ID:", docRef.id);
+            dados.id = docRef.id;
         }
-
     } catch (error) {
-        console.error("Erro ao salvar:", error);
-        alert("Erro ao salvar. Veja o console.");
+        console.error("Erro ao salvar dados no Firebase:", error);
+        alert("Erro ao salvar no Firebase. Veja o console.");
     }
 }
 /* ==== FIM SEÇÃO - SALVAR DADOS NO FIREBASE ==== */
 
 /* ==== INÍCIO SEÇÃO - GERAÇÃO DE ORÇAMENTO ==== */
 async function gerarOrcamento() {
-     if (orcamentoEditando !== null) {
-        alert("Você está no modo de edição. Clique em 'Atualizar Orçamento'.");
+    if (orcamentoEditando !== null) {
+        alert("Você está no modo de edição de orçamento. Clique em 'Atualizar Orçamento' para salvar as alterações.");
         return;
     }
-  const dataOrcamento = document.getElementById("dataOrcamento").value;
+
+    const dataOrcamento = document.getElementById("dataOrcamento").value;
     const dataValidade = document.getElementById("dataValidade").value;
+
     const orcamento = {
         numero: gerarNumeroFormatado(numeroOrcamento),
         dataOrcamento: dataOrcamento,
@@ -353,31 +350,30 @@ async function gerarOrcamento() {
         observacoes: document.getElementById("observacoes").value,
         pedidoGerado: false,
         numeroPedido: null,
-         tipo: 'orcamento'
+        tipo: 'orcamento' // Definição do tipo aqui
     };
 
     const produtos = document.querySelectorAll("#tabelaProdutos tbody tr");
     produtos.forEach(row => {
         orcamento.produtos.push({
-             quantidade: parseFloat(row.querySelector(".produto-quantidade").value),
+            quantidade: parseFloat(row.querySelector(".produto-quantidade").value),
             descricao: row.querySelector(".produto-descricao").value,
             valorUnit: converterMoedaParaNumero(row.querySelector(".produto-valor-unit").value),
             valorTotal: converterMoedaParaNumero(row.cells[3].textContent)
         });
     });
 
-    // Salvar no Firebase *antes* de atualizar a interface
-    await salvarDados(orcamento, 'orcamento');
-    orcamentos.push(orcamento); // Adiciona ao array local *após* salvar
-    numeroOrcamento++; // Incrementa *após* salvar
+    await salvarDados(orcamento, 'orcamento'); // Salva no Firebase
+    numeroOrcamento++;
+    orcamentos.push(orcamento); //Adiciona para renderizar
 
     document.getElementById("orcamento").reset();
     limparCamposMoeda();
     document.querySelector("#tabelaProdutos tbody").innerHTML = "";
 
-    alert("Orçamento gerado!");
-    mostrarPagina('orcamentos-gerados');  // Mostra a página de orçamentos
-    mostrarOrcamentosGerados();          // Atualiza a lista *imediatamente*
+    alert("Orçamento gerado com sucesso!");
+     mostrarPagina('orcamentos-gerados'); //Adicionado
+     mostrarOrcamentosGerados();          //Adicionado
 }
 
 function exibirOrcamentoEmHTML(orcamento) {
@@ -456,15 +452,16 @@ function exibirOrcamentoEmHTML(orcamento) {
 /* ==== INÍCIO SEÇÃO - ORÇAMENTOS GERADOS ==== */
 function mostrarOrcamentosGerados() {
     const tbody = document.querySelector("#tabela-orcamentos tbody");
-    tbody.innerHTML = ''; // Limpa a tabela
+    tbody.innerHTML = '';
 
-    orcamentos.forEach(orcamento => {
+    orcamentos.forEach(orcamento => {  // Usa a variável global 'orcamentos'
         const row = tbody.insertRow();
         const cellNumero = row.insertCell();
         const cellData = row.insertCell();
         const cellCliente = row.insertCell();
         const cellTotal = row.insertCell();
         const cellNumeroPedido = row.insertCell();
+        const cellAcoes = row.insertCell();
 
         cellNumero.textContent = orcamento.numero;
         cellData.textContent = orcamento.dataOrcamento;
@@ -472,17 +469,12 @@ function mostrarOrcamentosGerados() {
         cellTotal.textContent = formatarMoeda(orcamento.total);
         cellNumeroPedido.textContent = orcamento.numeroPedido || 'N/A';
 
-        // Cria os botões dentro da célula de ações
-        const cellAcoes = row.insertCell(); // Célula para os botões
-         if (orcamento.pedidoGerado) {
+        if (orcamento.pedidoGerado) {
             cellAcoes.innerHTML = `<button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>`;
         } else {
-            cellAcoes.innerHTML = `
-                <button type="button" onclick="editarOrcamento('${orcamento.id}')">Editar</button>
-                <button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>
-                <button type="button" onclick="gerarPedido('${orcamento.id}')">Gerar Pedido</button>
-                <button type="button" onclick="excluirOrcamento('${orcamento.id}')">Excluir</button>
-`; // Adicionado botão Excluir
+            cellAcoes.innerHTML = `<button type="button" onclick="editarOrcamento('${orcamento.id}')">Editar</button>
+                                   <button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>
+                                   <button type="button" onclick="gerarPedido('${orcamento.id}')">Gerar Pedido</button>`;
         }
     });
 }
@@ -510,7 +502,7 @@ function filtrarOrcamentos() {
 }
 
 function atualizarListaOrcamentos(orcamentosFiltrados) {
- const tbody = document.querySelector("#tabela-orcamentos tbody");
+    const tbody = document.querySelector("#tabela-orcamentos tbody");
     tbody.innerHTML = '';
 
     orcamentosFiltrados.forEach(orcamento => {
@@ -520,6 +512,7 @@ function atualizarListaOrcamentos(orcamentosFiltrados) {
         const cellCliente = row.insertCell();
         const cellTotal = row.insertCell();
         const cellNumeroPedido = row.insertCell();
+        const cellAcoes = row.insertCell();
 
         cellNumero.textContent = orcamento.numero;
         cellData.textContent = orcamento.dataOrcamento;
@@ -527,38 +520,14 @@ function atualizarListaOrcamentos(orcamentosFiltrados) {
         cellTotal.textContent = formatarMoeda(orcamento.total);
         cellNumeroPedido.textContent = orcamento.numeroPedido || 'N/A';
 
-         const cellAcoes = row.insertCell();
-          if (orcamento.pedidoGerado) {
+         if (orcamento.pedidoGerado) {
             cellAcoes.innerHTML = `<button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>`;
-          }else{
-            cellAcoes.innerHTML = `
-                <button type="button" onclick="editarOrcamento('${orcamento.id}')">Editar</button>
-                <button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>
-                <button type="button" onclick="gerarPedido('${orcamento.id}')">Gerar Pedido</button>
-                <button type="button" onclick="excluirOrcamento('${orcamento.id}')">Excluir</button>
-`; // Adicionado botão Excluir
-          }
+        } else {
+             cellAcoes.innerHTML = `<button type="button" onclick="editarOrcamento('${orcamento.id}')">Editar</button>
+                                    <button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>
+                                    <button type="button" onclick="gerarPedido('${orcamento.id}')">Gerar Pedido</button>`;
+        }
     });
-}
-
-// Função para excluir orçamento
-async function excluirOrcamento(orcamentoId) {
-    if (!confirm("Tem certeza que deseja excluir este orçamento?")) {
-        return;
-    }
-
-    try {
-        await deleteDoc(doc(orcamentosPedidosRef, orcamentoId));
-
-        // Remover do array local
-        orcamentos = orcamentos.filter(o => o.id !== orcamentoId);
-        mostrarOrcamentosGerados(); // Atualizar a exibição
-        alert("Orçamento excluído com sucesso!");
-
-    } catch (error) {
-        console.error("Erro ao excluir orçamento:", error);
-        alert("Erro ao excluir orçamento. Veja o console.");
-    }
 }
 
 function editarOrcamento(orcamentoId) {
@@ -616,18 +585,19 @@ function editarOrcamento(orcamentoId) {
 }
 
 async function atualizarOrcamento() {
-  if (orcamentoEditando === null) {
-        alert("Nenhum orçamento sendo editado.");
+    if (orcamentoEditando === null) {
+        alert("Nenhum orçamento está sendo editado.");
         return;
     }
-     const orcamentoIndex = orcamentos.findIndex(o => o.id === orcamentoEditando);
+
+  const orcamentoIndex = orcamentos.findIndex(o => o.id === orcamentoEditando); // Find by ID
     if (orcamentoIndex === -1) {
         alert("Orçamento não encontrado.");
         return;
     }
 
     const orcamentoAtualizado = {
-        ...orcamentos[orcamentoIndex],
+        ...orcamentos[orcamentoIndex], // Mantém os dados existentes
         dataOrcamento: document.getElementById("dataOrcamento").value,
         dataValidade: document.getElementById("dataValidade").value,
         cliente: document.getElementById("cliente").value,
@@ -656,35 +626,38 @@ async function atualizarOrcamento() {
         });
     });
 
-    orcamentos[orcamentoIndex] = orcamentoAtualizado;
-    await salvarDados(orcamentoAtualizado, 'orcamento'); // Salva
+    orcamentos[orcamentoIndex] = orcamentoAtualizado; // Atualiza no array local
+    await salvarDados(orcamentoAtualizado, 'orcamento'); // Salva no Firebase
 
-     document.getElementById("orcamento").reset();
+    document.getElementById("orcamento").reset();
     limparCamposMoeda();
     document.querySelector("#tabelaProdutos tbody").innerHTML = "";
 
-    alert("Orçamento atualizado!");
-    orcamentoEditando = null;
+    alert("Orçamento atualizado com sucesso!");
+
+    orcamentoEditando = null; // Reseta o estado de edição
     document.getElementById("btnGerarOrcamento").style.display = "inline-block";
     document.getElementById("btnAtualizarOrcamento").style.display = "none";
 
     mostrarPagina('orcamentos-gerados');
-    mostrarOrcamentosGerados(); // Atualiza a exibição
+    mostrarOrcamentosGerados();
 }
-
 /* ==== FIM SEÇÃO - ORÇAMENTOS GERADOS ==== */
 
 /* ==== INÍCIO SEÇÃO - GERAR PEDIDO A PARTIR DO ORÇAMENTO ==== */
 async function gerarPedido(orcamentoId) {
     const orcamento = orcamentos.find(o => o.id === orcamentoId);
     if (!orcamento) {
-        alert("Orçamento não encontrado");
+        alert("Orçamento não encontrado.");
         return;
     }
+
     if (orcamento.pedidoGerado) {
-        alert("Pedido já foi gerado.");
+        alert("Um pedido já foi gerado para este orçamento.");
         return;
     }
+
+    const pedido = {
         numero: gerarNumeroFormatado(numeroPedido),
         dataPedido: new Date().toISOString().split('T')[0],
         dataEntrega: orcamento.dataValidade,
@@ -709,23 +682,24 @@ async function gerarPedido(orcamentoId) {
             ...p,
             valorTotal: p.quantidade * p.valorUnit
         })),
-         tipo: 'pedido'
+      tipo: 'pedido' //Adicionado
+
     };
+  
     delete pedido.dataValidade;
 
-    // Salvar *antes* de atualizar a interface, usando await
     await salvarDados(pedido, 'pedido');
-    numeroPedido++; // Incrementa *após* salvar
-    pedidos.push(pedido); // Adiciona ao array local *após* salvar
+    numeroPedido++;
+    pedidos.push(pedido); // Adiciona o novo pedido ao array local
 
-    orcamento.numeroPedido = pedido.numero; // Vincula
+    orcamento.numeroPedido = pedido.numero;
     orcamento.pedidoGerado = true;
-    await salvarDados(orcamento, 'orcamento'); // Atualiza o orçamento
+    await salvarDados(orcamento, 'orcamento');
 
-    alert("Pedido Nº " + pedido.numero + " gerado!");
-    mostrarPagina('lista-pedidos'); // Mostra a página
-    mostrarPedidosRealizados();      // Atualiza a lista *imediatamente*
-    mostrarOrcamentosGerados(); // Atualiza orçamentos
+    alert(`Pedido Nº ${pedido.numero} gerado com sucesso a partir do orçamento Nº ${orcamento.numero}!`);
+    mostrarPagina('lista-pedidos');
+    mostrarPedidosRealizados();
+    mostrarOrcamentosGerados(); // Atualiza a lista de orçamentos
 }
 /* ==== FIM SEÇÃO - GERAR PEDIDO A PARTIR DO ORÇAMENTO ==== */
 
@@ -740,38 +714,14 @@ function mostrarPedidosRealizados() {
         const cellDataPedido = row.insertCell();
         const cellCliente = row.insertCell();
         const cellTotal = row.insertCell();
-
+        const cellAcoes = row.insertCell();
 
         cellNumero.textContent = pedido.numero;
         cellDataPedido.textContent = pedido.dataPedido;
         cellCliente.textContent = pedido.cliente;
         cellTotal.textContent = formatarMoeda(pedido.total);
-
-        const cellAcoes = row.insertCell();
-        cellAcoes.innerHTML = `
-            <button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>
-            <button type="button" onclick="excluirPedido('${pedido.id}')">Excluir</button>
-`; // Botão Excluir
+        cellAcoes.innerHTML = `<button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>`;
     });
-}
-
-// Função para excluir pedido
-async function excluirPedido(pedidoId) {
-    if (!confirm("Tem certeza que deseja excluir este pedido?")) {
-        return;
-    }
-
-    try {
-        await deleteDoc(doc(orcamentosPedidosRef, pedidoId));
-
-        //Remover array local
-        pedidos = pedidos.filter(p => p.id !== pedidoId);
-        mostrarPedidosRealizados(); // Atualizar exibição
-        alert("Pedido excluído!");
-     }catch (error){
-       console.error("Erro:", error);
-        alert("Erro. Veja console.");
-     }
 }
 
 function filtrarPedidos() {
@@ -797,26 +747,22 @@ function filtrarPedidos() {
 }
 
 function atualizarListaPedidos(pedidosFiltrados) {
- const tbody = document.querySelector("#tabela-pedidos tbody");
+    const tbody = document.querySelector("#tabela-pedidos tbody");
     tbody.innerHTML = '';
 
     pedidosFiltrados.forEach(pedido => {
-         const row = tbody.insertRow();
+        const row = tbody.insertRow();
         const cellNumero = row.insertCell();
         const cellDataPedido = row.insertCell();
         const cellCliente = row.insertCell();
         const cellTotal = row.insertCell();
+        const cellAcoes = row.insertCell();
 
         cellNumero.textContent = pedido.numero;
         cellDataPedido.textContent = pedido.dataPedido;
         cellCliente.textContent = pedido.cliente;
         cellTotal.textContent = formatarMoeda(pedido.total);
-
-          const cellAcoes = row.insertCell();
-          cellAcoes.innerHTML = `
-            <button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>
-            <button type="button" onclick="excluirPedido('${pedido.id}')">Excluir</button>
-`; // Botão Excluir
+        cellAcoes.innerHTML = `<button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>`;
     });
 }
 
@@ -827,7 +773,6 @@ function editarPedido(pedidoId) {
         return;
     }
 
-    // Preencher o formulário de edição com os dados do pedido
     document.getElementById("dataPedidoEdicao").value = pedido.dataPedido;
     document.getElementById("dataEntregaEdicao").value = pedido.dataEntrega;
     document.getElementById("clienteEdicao").value = pedido.cliente;
@@ -838,7 +783,7 @@ function editarPedido(pedidoId) {
     document.getElementById("coresEdicao").value = pedido.cores;
     document.getElementById("valorFreteEdicao").value = formatarMoeda(pedido.valorFrete);
     document.getElementById("valorPedidoEdicao").value = formatarMoeda(pedido.valorPedido);
-    document.getElementById("valorPedidoEdicao").onblur = atualizarTotaisEdicao; // Chama atualizarTotaisEdicao ao sair do campo
+    document.getElementById("valorPedidoEdicao").onblur = atualizarTotaisEdicao;
     document.getElementById("totalEdicao").value = formatarMoeda(pedido.total);
     document.getElementById("entradaEdicao").value = formatarMoeda(pedido.entrada);
     document.getElementById("restanteEdicao").value = formatarMoeda(pedido.restante);
@@ -846,7 +791,6 @@ function editarPedido(pedidoId) {
     document.getElementById("custoMaoDeObraEdicao").value = formatarMoeda(pedido.custoMaoDeObra || 0);
     document.getElementById("observacoesEdicao").value = pedido.observacoes;
 
-    // Preencher a tabela de produtos
     const tbody = document.querySelector("#tabelaProdutosEdicao tbody");
     tbody.innerHTML = '';
     pedido.produtos.forEach(produto => {
@@ -864,11 +808,9 @@ function editarPedido(pedidoId) {
         cellAcoes.innerHTML = '<button type="button" onclick="excluirProdutoEdicao(this)">Excluir</button>';
     });
 
-    // Preencher checkboxes de pagamento (com verificação de existência)
     const pagamentoCheckboxes = document.querySelectorAll('input[name="pagamentoEdicao"]');
     pagamentoCheckboxes.forEach(el => el.checked = pedido.pagamento && pedido.pagamento.includes(el.value));
 
-    // Mostrar a página de edição
     mostrarPagina('form-edicao-pedido');
 }
 
@@ -878,35 +820,36 @@ async function atualizarPedido() {
         alert("Pedido não encontrado.");
         return;
     }
-
+  
     const pedidoAtualizado = {
-        id: pedido.id, // Find by ID
-        numero: document.getElementById("numeroEdicao").value, //Aqui estava errado
-        dataPedido: document.getElementById("dataPedidoEdicao").value,
-        dataEntrega: document.getElementById("dataEntregaEdicao").value,
-        cliente: document.getElementById("clienteEdicao").value,
-        endereco: document.getElementById("enderecoEdicao").value,
-        tema: document.getElementById("temaEdicao").value,
-        cidade: document.getElementById("cidadeEdicao").value,
-        telefone: document.getElementById("contatoEdicao").value,
-        cores: document.getElementById("coresEdicao").value,
-        produtos: [],
-        pagamento: Array.from(document.querySelectorAll('input[name="pagamentoEdicao"]:checked')).map(el => el.value),
-        valorFrete: converterMoedaParaNumero(document.getElementById("valorFreteEdicao").value),
-        valorPedido: converterMoedaParaNumero(document.getElementById("valorPedidoEdicao").value),
-        total: converterMoedaParaNumero(document.getElementById("totalEdicao").value),
-        entrada: converterMoedaParaNumero(document.getElementById("entradaEdicao").value),
-        restante: converterMoedaParaNumero(document.getElementById("restanteEdicao").value),
-        margemLucro: converterMoedaParaNumero(document.getElementById("margemLucroEdicao").value) || 0,
-        custoMaoDeObra: converterMoedaParaNumero(document.getElementById("custoMaoDeObraEdicao").value) || 0,
-        observacoes: document.getElementById("observacoesEdicao").value,
-        tipo: 'pedido'
-    };
-      const produtos = document.querySelectorAll("#tabelaProdutosEdicao tbody tr");
+      id: pedido.id, // Find by ID
+      numero: document.getElementById("dataPedidoEdicao").value,
+      dataPedido: document.getElementById("dataPedidoEdicao").value,
+      dataEntrega: document.getElementById("dataEntregaEdicao").value,
+      cliente: document.getElementById("clienteEdicao").value,
+      endereco: document.getElementById("enderecoEdicao").value,
+      tema: document.getElementById("temaEdicao").value,
+      cidade: document.getElementById("cidadeEdicao").value,
+      telefone: document.getElementById("contatoEdicao").value,
+      cores: document.getElementById("coresEdicao").value,
+      produtos: [],
+      pagamento: Array.from(document.querySelectorAll('input[name="pagamentoEdicao"]:checked')).map(el => el.value),
+      valorFrete: converterMoedaParaNumero(document.getElementById("valorFreteEdicao").value),
+      valorPedido: converterMoedaParaNumero(document.getElementById("valorPedidoEdicao").value),
+      total: converterMoedaParaNumero(document.getElementById("totalEdicao").value),
+      entrada: converterMoedaParaNumero(document.getElementById("entradaEdicao").value),
+      restante: converterMoedaParaNumero(document.getElementById("restanteEdicao").value),
+      margemLucro: converterMoedaParaNumero(document.getElementById("margemLucroEdicao").value) || 0,
+      custoMaoDeObra: converterMoedaParaNumero(document.getElementById("custoMaoDeObraEdicao").value) || 0,
+      observacoes: document.getElementById("observacoesEdicao").value,
+      tipo: 'pedido'
+  };
+
+    const produtos = document.querySelectorAll("#tabelaProdutosEdicao tbody tr");
     produtos.forEach(row => {
         pedidoAtualizado.produtos.push({
             quantidade: parseFloat(row.querySelector(".produto-quantidade").value),
-            descricao: row.querySelector(".produto-descricao").value),
+            descricao: row.querySelector(".produto-descricao").value,
             valorUnit: converterMoedaParaNumero(row.querySelector(".produto-valor-unit").value),
             valorTotal: converterMoedaParaNumero(row.cells[3].textContent)
         });
@@ -919,6 +862,7 @@ async function atualizarPedido() {
     mostrarPagina('lista-pedidos');
     mostrarPedidosRealizados();
 }
+
 /* ==== FIM SEÇÃO - PEDIDOS REALIZADOS ==== */
 
 /* ==== INÍCIO SEÇÃO - RELATÓRIO ==== */
@@ -1003,5 +947,3 @@ function mostrarPagina(idPagina) {
 }
 
 /* ==== FIM SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
-    
-
