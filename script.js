@@ -1,61 +1,161 @@
 /* ==== INÍCIO - Configuração e Inicialização do Firebase ==== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
-import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDG1NYs6CM6TDfGAPXSz1ho8_-NWs28zSg", // SUA API KEY
-    authDomain: "perola-rara.firebaseapp.com", // SEU AUTH DOMAIN
-    projectId: "perola-rara", // SEU PROJECT ID
+    authDomain: "perola-rara.firebaseapp.com",       // SEU AUTH DOMAIN
+    projectId: "perola-rara",                     // SEU PROJECT ID
     storageBucket: "perola-rara.firebasestorage.app", // SEU STORAGE BUCKET
-    messagingSenderId: "502232132512", // SEU MESSAGING SENDER ID
+    messagingSenderId: "502232132512",               // SEU MESSAGING SENDER ID
     appId: "1:502232132512:web:59f227a7d35b39cc8752c5", // SEU APP ID
-    measurementId: "G-VHVMR10RSQ" // SEU MEASUREMENT ID (se usar Analytics)
+    measurementId: "G-VHVMR10RSQ"                   // SEU MEASUREMENT ID (se usar Analytics)
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app); // Opcional, mas recomendado
+const analytics = getAnalytics(app); // Opcional
 const db = getFirestore(app);
-const orcamentosPedidosRef = collection(db, "Orcamento-Pedido"); // Referência para a coleção
+const auth = getAuth(app); // Adicionado para autenticação
+const orcamentosPedidosRef = collection(db, "Orcamento-Pedido");
 /* ==== FIM - Configuração e Inicialização do Firebase ==== */
 
 /* ==== INÍCIO SEÇÃO - VARIÁVEIS GLOBAIS ==== */
-// Remova: let orcamentos = [];
-// Remova: let pedidos = [];
-// Mantenha e ajuste se necessário:
 let numeroOrcamento = 1;
 let numeroPedido = 1;
 const anoAtual = new Date().getFullYear();
-let orcamentoEditando = null; // Variável para controlar se está editando um orçamento
-
-// Adicione: Variáveis para armazenar dados do Firebase
+let orcamentoEditando = null;
 let orcamentos = [];
 let pedidos = [];
+let usuarioAtual = null; // Armazena o usuário logado
 /* ==== FIM SEÇÃO - VARIÁVEIS GLOBAIS ==== */
 
+/* ==== INÍCIO SEÇÃO - AUTENTICAÇÃO ==== */
+// Referências aos elementos do HTML (Autenticação)
+const btnRegister = document.getElementById('btnRegister');
+const btnLogin = document.getElementById('btnLogin');
+const btnLogout = document.getElementById('btnLogout');
+const authStatus = document.getElementById('authStatus');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const authSection = document.getElementById('authSection');
+const appContent = document.getElementById('appContent'); //Para mostrar Sections
 
-/* ==== INÍCIO SEÇÃO - CARREGAR DADOS DO FIREBASE ==== */
 
-async function carregarDados() {
-    try {
-        // Zera os arrays antes de carregar do Firebase
+// Função para lidar com a interface de autenticação
+function updateAuthUI(user) {
+    if (user) {
+        authStatus.textContent = "Usuário autenticado: " + user.email;
+        btnLogout.style.display = "inline-block";
+        btnLogin.style.display = "none";
+        btnRegister.style.display = "none";
+        authSection.style.display = "block"; //Sempre mostrar
+        appContent.style.display = "block";      // Mostrar conteúdo principal
+
+        // Carrega dados *somente* após autenticação
+        carregarDados();
+    } else {
+        authStatus.textContent = "Nenhum usuário autenticado";
+        btnLogout.style.display = "none";
+        btnLogin.style.display = "inline-block";
+        btnRegister.style.display = "inline-block";
+        authSection.style.display = "block";  //Sempre mostrar
+        appContent.style.display = "none"; // Ocultar conteúdo principal
+        
+        // Limpar os dados se o usuário fizer logout.
         orcamentos = [];
         pedidos = [];
+        numeroOrcamento = 1;
+        numeroPedido = 1;
+        mostrarOrcamentosGerados(); // Atualiza a exibição
+        mostrarPedidosRealizados();
+    }
+}
 
-        const snapshot = await getDocs(orcamentosPedidosRef);
+// Listeners de eventos para os botões de autenticação
+btnRegister.addEventListener('click', async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+     if (!email || !password) {
+        alert("Preencha email e senha para registrar.");
+        return;
+    }
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        console.log("Usuário registrado:", userCredential.user);
+        updateAuthUI(userCredential.user); // Atualiza a UI
+    } catch (error) {
+        console.error("Erro no registro:", error);
+        alert("Erro no registro: " + error.message);
+    }
+});
+
+btnLogin.addEventListener('click', async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+        alert("Preencha email e senha para entrar.");
+        return;
+    }
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log("Usuário logado:", userCredential.user);
+        updateAuthUI(userCredential.user); // Atualiza a UI
+    } catch (error) {
+        console.error("Erro no login:", error);
+        alert("Erro no login: " + error.message);
+    }
+});
+
+btnLogout.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        console.log("Usuário desconectado.");
+        updateAuthUI(null); // Atualiza a UI
+    } catch (error) {
+        console.error("Erro ao sair:", error);
+    }
+});
+
+// Monitor de estado de autenticação
+onAuthStateChanged(auth, (user) => {
+    usuarioAtual = user; // Define a variável global
+    updateAuthUI(user); // Sempre atualiza a UI
+});
+
+/* ==== FIM SEÇÃO - AUTENTICAÇÃO ==== */
+
+/* ==== INÍCIO SEÇÃO - CARREGAR DADOS DO FIREBASE ==== */
+async function carregarDados() {
+    if (!usuarioAtual) {
+        // Se não tiver usuário, não carrega nada.
+        return;
+    }
+
+    try {
+        orcamentos = [];
+        pedidos = [];
+        // Consulta com ordenação
+        const q = query(orcamentosPedidosRef, orderBy("numero"));
+        const snapshot = await getDocs(q);
+
         snapshot.forEach(doc => {
             const data = doc.data();
-            data.id = doc.id; // Adiciona o ID do documento aos dados
+            data.id = doc.id;
 
             if (data.tipo === 'orcamento') {
                 orcamentos.push(data);
-                numeroOrcamento = Math.max(numeroOrcamento, parseInt(data.numero.split('/')[0]) + 1); // Atualiza número do orçamento
+                numeroOrcamento = Math.max(numeroOrcamento, parseInt(data.numero.split('/')[0]) + 1);
             } else if (data.tipo === 'pedido') {
                 pedidos.push(data);
-                numeroPedido = Math.max(numeroPedido, parseInt(data.numero.split('/')[0]) + 1); //Atualiza número do pedido.
+                numeroPedido = Math.max(numeroPedido, parseInt(data.numero.split('/')[0]) + 1);
             }
         });
         console.log("Dados carregados do Firebase:", orcamentos, pedidos);
+        mostrarOrcamentosGerados();
+        mostrarPedidosRealizados();
 
     } catch (error) {
         console.error("Erro ao carregar dados do Firebase:", error);
@@ -63,15 +163,7 @@ async function carregarDados() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    await carregarDados(); // Carrega os dados do Firebase
-    mostrarPagina('form-orcamento');
-    // Remova: atualizarPainelUltimoBackup();  // Não é mais necessário
-});
-
 /* ==== FIM SEÇÃO - CARREGAR DADOS DO FIREBASE ==== */
-
-
 
 /* ==== INÍCIO SEÇÃO - FUNÇÕES AUXILIARES ==== */
 function formatarMoeda(valor) {
@@ -89,7 +181,7 @@ function formatarEntradaMoeda(input) {
 function converterMoedaParaNumero(valor) {
     if (typeof valor !== 'string') {
         console.warn('converterMoedaParaNumero recebeu um valor não string:', valor);
-        return 0; // Retorna 0 se o valor não for string
+        return 0;
     }
     return parseFloat(valor.replace(/R\$\s?|\./g, '').replace(',', '.')) || 0;
 }
@@ -172,7 +264,7 @@ function atualizarTotais() {
 }
 
 function atualizarTotaisEdicao() {
-    let valorTotalPedido = 0; // Soma dos totais da tabela de produtos
+    let valorTotalPedido = 0;
 
     document.querySelectorAll("#tabelaProdutosEdicao tbody tr").forEach(row => {
         const quantidade = parseFloat(row.querySelector(".produto-quantidade").value) || 0;
@@ -183,12 +275,9 @@ function atualizarTotaisEdicao() {
         valorTotalPedido += valorTotal;
     });
 
-    // NÃO atualizar valorPedidoEdicao aqui:
-    // document.getElementById("valorPedidoEdicao").value = formatarMoeda(valorTotalPedido);
-
     const valorFrete = converterMoedaParaNumero(document.getElementById("valorFreteEdicao").value);
-    const valorPedido = converterMoedaParaNumero(document.getElementById("valorPedidoEdicao").value); // Pega o valor digitado pelo usuário
-    const total = valorPedido + valorFrete; // Usa o valor digitado em valorPedidoEdicao
+    const valorPedido = converterMoedaParaNumero(document.getElementById("valorPedidoEdicao").value);
+    const total = valorPedido + valorFrete;
 
     document.getElementById("totalEdicao").value = formatarMoeda(total);
     atualizarRestanteEdicao();
@@ -197,8 +286,8 @@ function atualizarTotaisEdicao() {
 function atualizarRestanteEdicao() {
     const total = converterMoedaParaNumero(document.getElementById("totalEdicao").value);
     const entrada = converterMoedaParaNumero(document.getElementById("entradaEdicao").value);
-    const custoMaoDeObra = converterMoedaParaNumero(document.getElementById("custoMaoDeObraEdicao").value); // Adicionado custoMaoDeObra
-    const restante = total - entrada - custoMaoDeObra; // Subtraindo custoMaoDeObra do restante
+    const custoMaoDeObra = converterMoedaParaNumero(document.getElementById("custoMaoDeObraEdicao").value);
+    const restante = total - entrada - custoMaoDeObra;
 
     document.getElementById("restanteEdicao").value = formatarMoeda(restante);
 }
@@ -209,18 +298,21 @@ function gerarNumeroFormatado(numero) {
 
 /* ==== FIM DA SEÇÃO - FUNÇÕES AUXILIARES ==== */
 
-
-/* ==== INÍCIO SEÇÃO - SALVAR DADOS NO FIREBASE ==== */
-async function salvarDados(dados, tipo) { // Recebe os dados e o tipo ('orcamento' ou 'pedido')
+/* ==== INÍCIO SEÇÃO - SALVAR DADOS NO FIREBASE (COM VERIFICAÇÃO DE AUTENTICAÇÃO) ==== */
+async function salvarDados(dados, tipo) {
+    if (!usuarioAtual) {
+        alert("Você precisa estar autenticado para salvar dados.");
+        return; // Não salva se não estiver autenticado
+    }
     try {
-        if (dados.id) { // Se já tem ID, é uma atualização
+        if (dados.id) {
             const docRef = doc(orcamentosPedidosRef, dados.id);
-            await setDoc(docRef, dados, { merge: true }); // Atualiza o documento, mesclando dados
+            await setDoc(docRef, dados, { merge: true });
             console.log("Dados atualizados no Firebase com ID:", dados.id);
-        } else { // Se não tem ID, é um novo documento
-            const docRef = await addDoc(orcamentosPedidosRef, { ...dados, tipo }); // Adiciona o tipo
+        } else {
+            const docRef = await addDoc(orcamentosPedidosRef, { ...dados, tipo });
             console.log("Novos dados salvos no Firebase com ID:", docRef.id);
-            dados.id = docRef.id; // Guarda o ID gerado
+            dados.id = docRef.id;
         }
     } catch (error) {
         console.error("Erro ao salvar dados no Firebase:", error);
@@ -229,10 +321,8 @@ async function salvarDados(dados, tipo) { // Recebe os dados e o tipo ('orcament
 }
 /* ==== FIM SEÇÃO - SALVAR DADOS NO FIREBASE ==== */
 
-
 /* ==== INÍCIO SEÇÃO - GERAÇÃO DE ORÇAMENTO ==== */
 async function gerarOrcamento() {
-    // Verifica se está no modo de edição
     if (orcamentoEditando !== null) {
         alert("Você está no modo de edição de orçamento. Clique em 'Atualizar Orçamento' para salvar as alterações.");
         return;
@@ -259,7 +349,8 @@ async function gerarOrcamento() {
         total: converterMoedaParaNumero(document.getElementById("total").value),
         observacoes: document.getElementById("observacoes").value,
         pedidoGerado: false,
-        numeroPedido: null
+        numeroPedido: null,
+        tipo: 'orcamento' // Definição do tipo aqui
     };
 
     const produtos = document.querySelectorAll("#tabelaProdutos tbody tr");
@@ -272,35 +363,28 @@ async function gerarOrcamento() {
         });
     });
 
-    orcamento.tipo = 'orcamento'; // Define o tipo
     await salvarDados(orcamento, 'orcamento'); // Salva no Firebase
     numeroOrcamento++;
-
-    // Remova: exibirOrcamentoEmHTML(orcamento); // Mantém essa função por enquanto
-
-    // Remova: exportarDados();
-    // Remova: salvarDados();
+    orcamentos.push(orcamento); //Adiciona para renderizar
 
     document.getElementById("orcamento").reset();
     limparCamposMoeda();
     document.querySelector("#tabelaProdutos tbody").innerHTML = "";
 
     alert("Orçamento gerado com sucesso!");
+     mostrarPagina('orcamentos-gerados'); //Adicionado
+     mostrarOrcamentosGerados();          //Adicionado
 }
 
-function exibirOrcamentoEmHTML(orcamento) { // Recebe o objeto orcamento
+function exibirOrcamentoEmHTML(orcamento) {
     const janelaOrcamento = window.open('orcamento.html', '_blank');
 
     janelaOrcamento.addEventListener('load', () => {
         const conteudoOrcamento = janelaOrcamento.document.getElementById("conteudo-orcamento");
 
-        // Formatar data do orçamento para DD/MM/AAAA
         const dataOrcamentoFormatada = orcamento.dataOrcamento.split('-').reverse().join('/');
-
-        // Formatar data de validade para DD/MM/AAAA
         const dataValidadeFormatada = orcamento.dataValidade.split('-').reverse().join('/');
 
-        // Formatar opções de pagamento
         const pagamentoFormatado = orcamento.pagamento.map(pag => {
             if (pag === 'pix') return 'PIX';
             if (pag === 'dinheiro') return 'Dinheiro';
@@ -370,7 +454,7 @@ function mostrarOrcamentosGerados() {
     const tbody = document.querySelector("#tabela-orcamentos tbody");
     tbody.innerHTML = '';
 
-    orcamentos.forEach(orcamento => {
+    orcamentos.forEach(orcamento => {  // Usa a variável global 'orcamentos'
         const row = tbody.insertRow();
         const cellNumero = row.insertCell();
         const cellData = row.insertCell();
@@ -436,7 +520,7 @@ function atualizarListaOrcamentos(orcamentosFiltrados) {
         cellTotal.textContent = formatarMoeda(orcamento.total);
         cellNumeroPedido.textContent = orcamento.numeroPedido || 'N/A';
 
-        if (orcamento.pedidoGerado) {
+         if (orcamento.pedidoGerado) {
             cellAcoes.innerHTML = `<button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>`;
         } else {
              cellAcoes.innerHTML = `<button type="button" onclick="editarOrcamento('${orcamento.id}')">Editar</button>
@@ -446,8 +530,8 @@ function atualizarListaOrcamentos(orcamentosFiltrados) {
     });
 }
 
-function editarOrcamento(orcamentoId) { // Recebe o ID agora
-    const orcamento = orcamentos.find(o => o.id === orcamentoId); // Busca pelo ID
+function editarOrcamento(orcamentoId) {
+    const orcamento = orcamentos.find(o => o.id === orcamentoId);
     if (!orcamento) {
         alert("Orçamento não encontrado.");
         return;
@@ -458,7 +542,7 @@ function editarOrcamento(orcamentoId) { // Recebe o ID agora
         return;
     }
 
-    orcamentoEditando = orcamento.numero;
+    orcamentoEditando = orcamento.id; // Usando o ID agora
 
     document.getElementById("dataOrcamento").value = orcamento.dataOrcamento;
     document.getElementById("dataValidade").value = orcamento.dataValidade;
@@ -506,14 +590,14 @@ async function atualizarOrcamento() {
         return;
     }
 
-    const orcamentoIndex = orcamentos.findIndex(o => o.numero === orcamentoEditando);
+  const orcamentoIndex = orcamentos.findIndex(o => o.id === orcamentoEditando); // Find by ID
     if (orcamentoIndex === -1) {
         alert("Orçamento não encontrado.");
         return;
     }
 
-    orcamentos[orcamentoIndex] = {
-        ...orcamentos[orcamentoIndex],
+    const orcamentoAtualizado = {
+        ...orcamentos[orcamentoIndex], // Mantém os dados existentes
         dataOrcamento: document.getElementById("dataOrcamento").value,
         dataValidade: document.getElementById("dataValidade").value,
         cliente: document.getElementById("cliente").value,
@@ -523,17 +607,18 @@ async function atualizarOrcamento() {
         telefone: document.getElementById("telefone").value,
         email: document.getElementById("email").value,
         cores: document.getElementById("cores").value,
-        produtos: [],
+        produtos: [], // Começa com um array vazio e preenche abaixo
         pagamento: Array.from(document.querySelectorAll('input[name="pagamento"]:checked')).map(el => el.value),
         valorFrete: converterMoedaParaNumero(document.getElementById("valorFrete").value),
         valorOrcamento: converterMoedaParaNumero(document.getElementById("valorOrcamento").value),
         total: converterMoedaParaNumero(document.getElementById("total").value),
         observacoes: document.getElementById("observacoes").value,
+        tipo: 'orcamento' // Explicitamente define o tipo
     };
 
     const produtos = document.querySelectorAll("#tabelaProdutos tbody tr");
     produtos.forEach(row => {
-        orcamentos[orcamentoIndex].produtos.push({
+        orcamentoAtualizado.produtos.push({ // Preenche o array de produtos
             quantidade: parseFloat(row.querySelector(".produto-quantidade").value),
             descricao: row.querySelector(".produto-descricao").value,
             valorUnit: converterMoedaParaNumero(row.querySelector(".produto-valor-unit").value),
@@ -541,11 +626,8 @@ async function atualizarOrcamento() {
         });
     });
 
-    orcamentos[orcamentoIndex].tipo = 'orcamento'; // Garante o tipo
-    await salvarDados(orcamentos[orcamentoIndex], 'orcamento');
-
-    // Remova: exportarDados();
-    // Remova: salvarDados();
+    orcamentos[orcamentoIndex] = orcamentoAtualizado; // Atualiza no array local
+    await salvarDados(orcamentoAtualizado, 'orcamento'); // Salva no Firebase
 
     document.getElementById("orcamento").reset();
     limparCamposMoeda();
@@ -553,7 +635,7 @@ async function atualizarOrcamento() {
 
     alert("Orçamento atualizado com sucesso!");
 
-    orcamentoEditando = null;
+    orcamentoEditando = null; // Reseta o estado de edição
     document.getElementById("btnGerarOrcamento").style.display = "inline-block";
     document.getElementById("btnAtualizarOrcamento").style.display = "none";
 
@@ -563,8 +645,8 @@ async function atualizarOrcamento() {
 /* ==== FIM SEÇÃO - ORÇAMENTOS GERADOS ==== */
 
 /* ==== INÍCIO SEÇÃO - GERAR PEDIDO A PARTIR DO ORÇAMENTO ==== */
-async function gerarPedido(numeroOrcamento) {
-    const orcamento = orcamentos.find(o => o.id === numeroOrcamento); // Modificado para usar o ID
+async function gerarPedido(orcamentoId) {
+    const orcamento = orcamentos.find(o => o.id === orcamentoId);
     if (!orcamento) {
         alert("Orçamento não encontrado.");
         return;
@@ -576,7 +658,7 @@ async function gerarPedido(numeroOrcamento) {
     }
 
     const pedido = {
-        numero: gerarNumeroFormatado(numeroPedido), // Gera o NÚMERO DO PEDIDO corretamente
+        numero: gerarNumeroFormatado(numeroPedido),
         dataPedido: new Date().toISOString().split('T')[0],
         dataEntrega: orcamento.dataValidade,
         cliente: orcamento.cliente,
@@ -593,36 +675,31 @@ async function gerarPedido(numeroOrcamento) {
         observacoes: orcamento.observacoes,
         entrada: 0,
         restante: orcamento.total,
-        margemLucro: converterMoedaParaNumero(String(orcamento.margemLucro)) || 0, // Garante inicialização como número e string
-        custoMaoDeObra: converterMoedaParaNumero(String(orcamento.custoMaoDeObra)) || 0, // Garante inicialização como número e string
+        margemLucro: converterMoedaParaNumero(String(orcamento.margemLucro)) || 0,
+        custoMaoDeObra: converterMoedaParaNumero(String(orcamento.custoMaoDeObra)) || 0,
         valorPedido: orcamento.valorOrcamento,
         produtos: orcamento.produtos.map(p => ({
             ...p,
             valorTotal: p.quantidade * p.valorUnit
         })),
+      tipo: 'pedido' //Adicionado
 
     };
-    
+  
     delete pedido.dataValidade;
 
-    pedido.tipo = 'pedido'; // Define o tipo
     await salvarDados(pedido, 'pedido');
     numeroPedido++;
+    pedidos.push(pedido); // Adiciona o novo pedido ao array local
 
-
-    // Atualiza o orçamento para marcar que o pedido foi gerado
     orcamento.numeroPedido = pedido.numero;
     orcamento.pedidoGerado = true;
-    await salvarDados(orcamento, 'orcamento'); // Salva a atualização do orçamento
+    await salvarDados(orcamento, 'orcamento');
 
-
-    // Remova: exportarDados();
-    // Remova: salvarDados();
-
-    alert(`Pedido Nº ${pedido.numero} gerado com sucesso a partir do orçamento Nº ${numeroOrcamento}!`);
+    alert(`Pedido Nº ${pedido.numero} gerado com sucesso a partir do orçamento Nº ${orcamento.numero}!`);
     mostrarPagina('lista-pedidos');
     mostrarPedidosRealizados();
-    mostrarOrcamentosGerados();
+    mostrarOrcamentosGerados(); // Atualiza a lista de orçamentos
 }
 /* ==== FIM SEÇÃO - GERAR PEDIDO A PARTIR DO ORÇAMENTO ==== */
 
@@ -643,7 +720,7 @@ function mostrarPedidosRealizados() {
         cellDataPedido.textContent = pedido.dataPedido;
         cellCliente.textContent = pedido.cliente;
         cellTotal.textContent = formatarMoeda(pedido.total);
-        cellAcoes.innerHTML = `<button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>`; // Modificado para usar o ID
+        cellAcoes.innerHTML = `<button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>`;
     });
 }
 
@@ -685,18 +762,17 @@ function atualizarListaPedidos(pedidosFiltrados) {
         cellDataPedido.textContent = pedido.dataPedido;
         cellCliente.textContent = pedido.cliente;
         cellTotal.textContent = formatarMoeda(pedido.total);
-        cellAcoes.innerHTML = `<button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>`; //Modificado para usar ID.
+        cellAcoes.innerHTML = `<button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>`;
     });
 }
 
-function editarPedido(pedidoId) { // Modificado para usar o ID
-    const pedido = pedidos.find(p => p.id === pedidoId); // Modificado para usar o ID
+function editarPedido(pedidoId) {
+    const pedido = pedidos.find(p => p.id === pedidoId);
     if (!pedido) {
         alert("Pedido não encontrado.");
         return;
     }
 
-    // Preencher o formulário de edição com os dados do pedido
     document.getElementById("dataPedidoEdicao").value = pedido.dataPedido;
     document.getElementById("dataEntregaEdicao").value = pedido.dataEntrega;
     document.getElementById("clienteEdicao").value = pedido.cliente;
@@ -707,7 +783,7 @@ function editarPedido(pedidoId) { // Modificado para usar o ID
     document.getElementById("coresEdicao").value = pedido.cores;
     document.getElementById("valorFreteEdicao").value = formatarMoeda(pedido.valorFrete);
     document.getElementById("valorPedidoEdicao").value = formatarMoeda(pedido.valorPedido);
-    document.getElementById("valorPedidoEdicao").onblur = atualizarTotaisEdicao; // Chama atualizarTotaisEdicao ao sair do campo
+    document.getElementById("valorPedidoEdicao").onblur = atualizarTotaisEdicao;
     document.getElementById("totalEdicao").value = formatarMoeda(pedido.total);
     document.getElementById("entradaEdicao").value = formatarMoeda(pedido.entrada);
     document.getElementById("restanteEdicao").value = formatarMoeda(pedido.restante);
@@ -715,7 +791,6 @@ function editarPedido(pedidoId) { // Modificado para usar o ID
     document.getElementById("custoMaoDeObraEdicao").value = formatarMoeda(pedido.custoMaoDeObra || 0);
     document.getElementById("observacoesEdicao").value = pedido.observacoes;
 
-    // Preencher a tabela de produtos
     const tbody = document.querySelector("#tabelaProdutosEdicao tbody");
     tbody.innerHTML = '';
     pedido.produtos.forEach(produto => {
@@ -733,60 +808,55 @@ function editarPedido(pedidoId) { // Modificado para usar o ID
         cellAcoes.innerHTML = '<button type="button" onclick="excluirProdutoEdicao(this)">Excluir</button>';
     });
 
-    // Preencher checkboxes de pagamento (com verificação de existência)
     const pagamentoCheckboxes = document.querySelectorAll('input[name="pagamentoEdicao"]');
     pagamentoCheckboxes.forEach(el => el.checked = pedido.pagamento && pedido.pagamento.includes(el.value));
 
-    // Mostrar a página de edição
     mostrarPagina('form-edicao-pedido');
 }
 
 async function atualizarPedido() {
-    const numeroPedido = document.getElementById("dataPedidoEdicao").value;
-    const pedidoIndex = pedidos.findIndex(p => p.numero === numeroPedido);
-
+   const pedidoIndex = pedidos.findIndex(p => p.id === pedido.id); // Find by ID
     if (pedidoIndex === -1) {
         alert("Pedido não encontrado.");
         return;
     }
-
+  
     const pedidoAtualizado = {
-        numero: numeroPedido,
-        dataPedido: document.getElementById("dataPedidoEdicao").value,
-        dataEntrega: document.getElementById("dataEntregaEdicao").value,
-        cliente: document.getElementById("clienteEdicao").value,
-        endereco: document.getElementById("enderecoEdicao").value,
-        tema: document.getElementById("temaEdicao").value,
-        cidade: document.getElementById("cidadeEdicao").value,
-        telefone: document.getElementById("contatoEdicao").value,
-        cores: document.getElementById("coresEdicao").value,
-        produtos: [],
-        pagamento: Array.from(document.querySelectorAll('input[name="pagamentoEdicao"]:checked')).map(el => el.value),
-        valorFrete: converterMoedaParaNumero(document.getElementById("valorFreteEdicao").value),
-        valorPedido: converterMoedaParaNumero(document.getElementById("valorPedidoEdicao").value),
-        total: converterMoedaParaNumero(document.getElementById("totalEdicao").value),
-        entrada: converterMoedaParaNumero(document.getElementById("entradaEdicao").value),
-        restante: converterMoedaParaNumero(document.getElementById("restanteEdicao").value),
-        margemLucro: converterMoedaParaNumero(document.getElementById("margemLucroEdicao").value) || 0,
-        custoMaoDeObra: converterMoedaParaNumero(document.getElementById("custoMaoDeObraEdicao").value) || 0,
-        observacoes: document.getElementById("observacoesEdicao").value,
-        tipo: 'pedido' // Adicione esta linha
-    };
+      id: pedido.id, // Find by ID
+      numero: document.getElementById("dataPedidoEdicao").value,
+      dataPedido: document.getElementById("dataPedidoEdicao").value,
+      dataEntrega: document.getElementById("dataEntregaEdicao").value,
+      cliente: document.getElementById("clienteEdicao").value,
+      endereco: document.getElementById("enderecoEdicao").value,
+      tema: document.getElementById("temaEdicao").value,
+      cidade: document.getElementById("cidadeEdicao").value,
+      telefone: document.getElementById("contatoEdicao").value,
+      cores: document.getElementById("coresEdicao").value,
+      produtos: [],
+      pagamento: Array.from(document.querySelectorAll('input[name="pagamentoEdicao"]:checked')).map(el => el.value),
+      valorFrete: converterMoedaParaNumero(document.getElementById("valorFreteEdicao").value),
+      valorPedido: converterMoedaParaNumero(document.getElementById("valorPedidoEdicao").value),
+      total: converterMoedaParaNumero(document.getElementById("totalEdicao").value),
+      entrada: converterMoedaParaNumero(document.getElementById("entradaEdicao").value),
+      restante: converterMoedaParaNumero(document.getElementById("restanteEdicao").value),
+      margemLucro: converterMoedaParaNumero(document.getElementById("margemLucroEdicao").value) || 0,
+      custoMaoDeObra: converterMoedaParaNumero(document.getElementById("custoMaoDeObraEdicao").value) || 0,
+      observacoes: document.getElementById("observacoesEdicao").value,
+      tipo: 'pedido'
+  };
 
     const produtos = document.querySelectorAll("#tabelaProdutosEdicao tbody tr");
     produtos.forEach(row => {
         pedidoAtualizado.produtos.push({
             quantidade: parseFloat(row.querySelector(".produto-quantidade").value),
-            descricao: row.querySelector(".produto-descricao").value),
+            descricao: row.querySelector(".produto-descricao").value,
             valorUnit: converterMoedaParaNumero(row.querySelector(".produto-valor-unit").value),
             valorTotal: converterMoedaParaNumero(row.cells[3].textContent)
         });
     });
 
-    pedidos[pedidoIndex] = pedidoAtualizado;
-
-    // Salvar no Firebase
-    await salvarDados(pedidoAtualizado, 'pedido');
+    pedidos[pedidoIndex] = pedidoAtualizado; // Atualiza o array local
+    await salvarDados(pedidoAtualizado, 'pedido'); // Salva no Firebase
 
     alert("Pedido atualizado com sucesso!");
     mostrarPagina('lista-pedidos');
@@ -802,8 +872,8 @@ function filtrarPedidosRelatorio() {
 
     const pedidosFiltrados = pedidos.filter(pedido => {
         const dataPedido = new Date(pedido.dataPedido);
-        const inicio = dataInicio ? new Date(dataInicio) : new Date('1970-01-01'); // Data mínima
-        const fim = dataFim ? new Date(dataFim) : new Date('2100-01-01'); // Data máxima
+        const inicio = dataInicio ? new Date(dataInicio) : new Date('1970-01-01');
+        const fim = dataFim ? new Date(dataFim) : new Date('2100-01-01');
 
         return dataPedido >= inicio && dataPedido <= fim;
     });
@@ -815,13 +885,13 @@ function gerarRelatorio(pedidosFiltrados) {
     let totalPedidos = 0;
     let totalFrete = 0;
     let totalMargemLucro = 0;
-    let totalCustoMaoDeObra = 0; // Nova variável para o total de custo de mão de obra
+    let totalCustoMaoDeObra = 0;
 
     pedidosFiltrados.forEach(pedido => {
         totalPedidos += pedido.total;
         totalFrete += pedido.valorFrete;
-        totalMargemLucro += converterMoedaParaNumero(String(pedido.margemLucro)); // Converte para String explicitamente
-        totalCustoMaoDeObra += converterMoedaParaNumero(String(pedido.custoMaoDeObra)); // Converte para String explicitamente
+        totalMargemLucro += converterMoedaParaNumero(String(pedido.margemLucro));
+        totalCustoMaoDeObra += converterMoedaParaNumero(String(pedido.custoMaoDeObra));
     });
 
     const quantidadePedidos = pedidosFiltrados.length;
@@ -833,7 +903,7 @@ function gerarRelatorio(pedidosFiltrados) {
                     <th>Total de Pedidos</th>
                     <th>Total de Frete</th>
                     <th>Total de Margem de Lucro</th>
-                    <th>Total de Custo de Mão de Obra</th> <!-- Nova coluna aqui -->
+                    <th>Total de Custo de Mão de Obra</th>
                     <th>Quantidade de Pedidos</th>
                 </tr>
             </thead>
@@ -842,7 +912,7 @@ function gerarRelatorio(pedidosFiltrados) {
                     <td>${formatarMoeda(totalPedidos)}</td>
                     <td>${formatarMoeda(totalFrete)}</td>
                     <td>${formatarMoeda(totalMargemLucro)}</td>
-                    <td>${formatarMoeda(totalCustoMaoDeObra)}</td> <!-- Dados da nova coluna aqui -->
+                    <td>${formatarMoeda(totalCustoMaoDeObra)}</td>
                     <td>${quantidadePedidos}</td>
                 </tr>
             </tbody>
@@ -853,28 +923,18 @@ function gerarRelatorio(pedidosFiltrados) {
 }
 
 function gerarRelatorioXLSX() {
-    // Verifica se a tabela de relatório foi gerada
     const relatorioTable = document.querySelector('.relatorio-table');
     if (!relatorioTable) {
         alert('Erro: Tabela de relatório não encontrada. Gere o relatório primeiro.');
         return;
     }
 
-    // Criar uma nova pasta de trabalho
     const wb = XLSX.utils.book_new();
-
-    // Criar uma nova planilha
     const ws = XLSX.utils.table_to_sheet(relatorioTable);
-
-    // Adicionar a planilha à pasta de trabalho
     XLSX.utils.book_append_sheet(wb, ws, "Relatorio");
-
-    // Gerar o arquivo XLSX e iniciar o download
     XLSX.writeFile(wb, "relatorio_pedidos.xlsx");
 }
 /* ==== FIM SEÇÃO - RELATÓRIO ==== */
-
-/* ==== REMOVIDAS SEÇÕES DE IMPORTAR/EXPORTAR E PAINEL ==== */
 
 /* ==== INÍCIO SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
 function mostrarPagina(idPagina) {
@@ -886,44 +946,5 @@ function mostrarPagina(idPagina) {
     document.getElementById(idPagina).style.display = 'block';
 }
 
-// Removidas as funções: salvarDados (agora existe a versão async), carregarDados (substituída pela versão async com Firebase)
-
-function limparPagina() {
-    if (confirm("Tem certeza que deseja limpar todos os dados da página?  Os dados no Firebase não serão alterados.")) {
-        // Não mais: localStorage.clear();
-        // Não mais: orcamentos = [];  pedidos = [];
-        // Não mais: numeroOrcamento = 1; numeroPedido = 1;
-        // Não mais: atualizarPainelUltimoBackup();
-
-        // Recarrega os dados do Firebase:
-        carregarDados().then(() => {
-            alert("Dados recarregados do Firebase.");
-            mostrarPagina('form-orcamento');
-
-            const formOrcamento = document.getElementById("orcamento");
-            const formEdicaoPedido = document.getElementById("edicaoPedido");
-
-            if (formOrcamento) {
-                formOrcamento.reset();
-                limparCamposMoeda();
-                document.querySelector("#tabelaProdutos tbody").innerHTML = "";
-            }
-
-            if (formEdicaoPedido) {
-                formEdicaoPedido.reset();
-                limparCamposMoeda();
-                document.querySelector("#tabelaProdutosEdicao tbody").innerHTML = "";
-                document.getElementById('custoMaoDeObraEdicao').value = '0,00'; // Limpa o campo Custo de mão de obra
-                document.getElementById('margemLucroEdicao').value = '0,00'; // Limpa o campo Margem de Lucro (opcional, pois limparCamposMoeda já limpa campos moeda)
-            }
-
-            if (document.getElementById("orcamentos-gerados").style.display === 'block') {
-                mostrarOrcamentosGerados();
-            }
-            if (document.getElementById("lista-pedidos").style.display === 'block') {
-                mostrarPedidosRealizados();
-            }
-        });
-    }
-}
 /* ==== FIM SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
+
