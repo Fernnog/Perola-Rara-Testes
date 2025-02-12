@@ -5,19 +5,19 @@ import { getFirestore, collection, addDoc, getDocs, doc, setDoc, query, where, o
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDG1NYs6CM6TDfGAPXSz1ho8_-NWs28zSg", // SUA API KEY
-    authDomain: "perola-rara.firebaseapp.com",       // SEU AUTH DOMAIN
-    projectId: "perola-rara",                     // SEU PROJECT ID
-    storageBucket: "perola-rara.firebasestorage.app", // SEU STORAGE BUCKET
-    messagingSenderId: "502232132512",               // SEU MESSAGING SENDER ID
-    appId: "1:502232132512:web:59f227a7d35b39cc8752c5", // SEU APP ID
-    measurementId: "G-VHVMR10RSQ"                   // SEU MEASUREMENT ID (se usar Analytics)
+    apiKey: "SUA_API_KEY", // Substitua com a sua API Key
+    authDomain: "SEU_AUTH_DOMAIN",
+    projectId: "SEU_PROJECT_ID",
+    storageBucket: "SEU_STORAGE_BUCKET",
+    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+    appId: "SEU_APP_ID",
+    measurementId: "SEU_MEASUREMENT_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app); // Opcional
 const db = getFirestore(app);
-const auth = getAuth(app); // Adicionado para autenticação
+const auth = getAuth(app);
 const orcamentosPedidosRef = collection(db, "Orcamento-Pedido");
 /* ==== FIM - Configuração e Inicialização do Firebase ==== */
 
@@ -32,7 +32,7 @@ let usuarioAtual = null; // Armazena o usuário logado
 /* ==== FIM SEÇÃO - VARIÁVEIS GLOBAIS ==== */
 
 /* ==== INÍCIO SEÇÃO - AUTENTICAÇÃO ==== */
-// Referências aos elementos do HTML (Autenticação)
+// Referências aos elementos do HTML (Autenticação) - Fora do DOMContentLoaded
 const btnRegister = document.getElementById('btnRegister');
 const btnLogin = document.getElementById('btnLogin');
 const btnLogout = document.getElementById('btnLogout');
@@ -40,8 +40,7 @@ const authStatus = document.getElementById('authStatus');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const authSection = document.getElementById('authSection');
-const appContent = document.getElementById('appContent'); //Para mostrar Sections
-
+const appContent = document.getElementById('appContent');
 
 // Função para lidar com a interface de autenticação
 function updateAuthUI(user) {
@@ -62,18 +61,18 @@ function updateAuthUI(user) {
         btnRegister.style.display = "inline-block";
         authSection.style.display = "block";  //Sempre mostrar
         appContent.style.display = "none"; // Ocultar conteúdo principal
-        
+
         // Limpar os dados se o usuário fizer logout.
         orcamentos = [];
         pedidos = [];
         numeroOrcamento = 1;
         numeroPedido = 1;
-        mostrarOrcamentosGerados(); // Atualiza a exibição
-        mostrarPedidosRealizados();
+        mostrarOrcamentosGerados(); // Atualiza a exibição, mesmo que vazia
+        mostrarPedidosRealizados();  // Atualiza a exibição, mesmo que vazia
     }
 }
 
-// Listeners de eventos para os botões de autenticação
+//Funções de autenticação movidas para fora do DOMContentLoaded
 btnRegister.addEventListener('click', async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -120,25 +119,22 @@ btnLogout.addEventListener('click', async () => {
 });
 
 // Monitor de estado de autenticação
-onAuthStateChanged(auth, (user) => {
-    usuarioAtual = user; // Define a variável global
-    updateAuthUI(user); // Sempre atualiza a UI
+onAuthStateChanged(auth, (user) => {  // Monitor SEMPRE é executado.
+    usuarioAtual = user;
+    updateAuthUI(user);
 });
-
-/* ==== FIM SEÇÃO - AUTENTICAÇÃO ==== */
+/* ==== FIM SEÇÃO - AUTENTICAÇÃO ====*/
 
 /* ==== INÍCIO SEÇÃO - CARREGAR DADOS DO FIREBASE ==== */
 async function carregarDados() {
     if (!usuarioAtual) {
-        // Se não tiver usuário, não carrega nada.
         return;
     }
 
     try {
         orcamentos = [];
         pedidos = [];
-        // Consulta com ordenação
-        const q = query(orcamentosPedidosRef, orderBy("numero"));
+        const q = query(orcamentosPedidosRef, orderBy("numero"));// Consulta com ordenação
         const snapshot = await getDocs(q);
 
         snapshot.forEach(doc => {
@@ -154,18 +150,18 @@ async function carregarDados() {
             }
         });
         console.log("Dados carregados do Firebase:", orcamentos, pedidos);
-        mostrarOrcamentosGerados();
-        mostrarPedidosRealizados();
+        mostrarOrcamentosGerados(); // Agora dentro do try, após carregar
+        mostrarPedidosRealizados();  // Agora dentro do try, após carregar
 
     } catch (error) {
         console.error("Erro ao carregar dados do Firebase:", error);
         alert("Erro ao carregar dados do Firebase. Veja o console para detalhes.");
     }
 }
-
 /* ==== FIM SEÇÃO - CARREGAR DADOS DO FIREBASE ==== */
 
 /* ==== INÍCIO SEÇÃO - FUNÇÕES AUXILIARES ==== */
+// (Todas as funções auxiliares permanecem as mesmas e estão corretas)
 function formatarMoeda(valor) {
     return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -295,14 +291,13 @@ function atualizarRestanteEdicao() {
 function gerarNumeroFormatado(numero) {
     return numero.toString().padStart(4, '0') + '/' + anoAtual;
 }
-
 /* ==== FIM DA SEÇÃO - FUNÇÕES AUXILIARES ==== */
 
 /* ==== INÍCIO SEÇÃO - SALVAR DADOS NO FIREBASE (COM VERIFICAÇÃO DE AUTENTICAÇÃO) ==== */
 async function salvarDados(dados, tipo) {
     if (!usuarioAtual) {
         alert("Você precisa estar autenticado para salvar dados.");
-        return; // Não salva se não estiver autenticado
+        return;
     }
     try {
         if (dados.id) {
@@ -357,7 +352,7 @@ async function gerarOrcamento() {
     produtos.forEach(row => {
         orcamento.produtos.push({
             quantidade: parseFloat(row.querySelector(".produto-quantidade").value),
-            descricao: row.querySelector(".produto-descricao").value,
+            descricao: row.querySelector(".produto-descricao").value),
             valorUnit: converterMoedaParaNumero(row.querySelector(".produto-valor-unit").value),
             valorTotal: converterMoedaParaNumero(row.cells[3].textContent)
         });
@@ -454,7 +449,7 @@ function mostrarOrcamentosGerados() {
     const tbody = document.querySelector("#tabela-orcamentos tbody");
     tbody.innerHTML = '';
 
-    orcamentos.forEach(orcamento => {  // Usa a variável global 'orcamentos'
+    orcamentos.forEach(orcamento => {
         const row = tbody.insertRow();
         const cellNumero = row.insertCell();
         const cellData = row.insertCell();
@@ -520,7 +515,7 @@ function atualizarListaOrcamentos(orcamentosFiltrados) {
         cellTotal.textContent = formatarMoeda(orcamento.total);
         cellNumeroPedido.textContent = orcamento.numeroPedido || 'N/A';
 
-         if (orcamento.pedidoGerado) {
+        if (orcamento.pedidoGerado) {
             cellAcoes.innerHTML = `<button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>`;
         } else {
              cellAcoes.innerHTML = `<button type="button" onclick="editarOrcamento('${orcamento.id}')">Editar</button>
@@ -620,7 +615,7 @@ async function atualizarOrcamento() {
     produtos.forEach(row => {
         orcamentoAtualizado.produtos.push({ // Preenche o array de produtos
             quantidade: parseFloat(row.querySelector(".produto-quantidade").value),
-            descricao: row.querySelector(".produto-descricao").value,
+            descricao: row.querySelector(".produto-descricao").value),
             valorUnit: converterMoedaParaNumero(row.querySelector(".produto-valor-unit").value),
             valorTotal: converterMoedaParaNumero(row.cells[3].textContent)
         });
@@ -685,7 +680,7 @@ async function gerarPedido(orcamentoId) {
       tipo: 'pedido' //Adicionado
 
     };
-  
+
     delete pedido.dataValidade;
 
     await salvarDados(pedido, 'pedido');
@@ -815,14 +810,16 @@ function editarPedido(pedidoId) {
 }
 
 async function atualizarPedido() {
-   const pedidoIndex = pedidos.findIndex(p => p.id === pedido.id); // Find by ID
+  const pedidoId = document.getElementById('dataPedidoEdicao').value; // Captura o ID do pedido (Corrigido)
+    const pedidoIndex = pedidos.findIndex(p => p.numero === pedidoId); // Usa o número do pedido para encontrar.
+    
     if (pedidoIndex === -1) {
         alert("Pedido não encontrado.");
         return;
     }
   
     const pedidoAtualizado = {
-      id: pedido.id, // Find by ID
+      id: pedidos[pedidoIndex].id,
       numero: document.getElementById("dataPedidoEdicao").value,
       dataPedido: document.getElementById("dataPedidoEdicao").value,
       dataEntrega: document.getElementById("dataEntregaEdicao").value,
@@ -849,7 +846,7 @@ async function atualizarPedido() {
     produtos.forEach(row => {
         pedidoAtualizado.produtos.push({
             quantidade: parseFloat(row.querySelector(".produto-quantidade").value),
-            descricao: row.querySelector(".produto-descricao").value,
+            descricao: row.querySelector(".produto-descricao").value),
             valorUnit: converterMoedaParaNumero(row.querySelector(".produto-valor-unit").value),
             valorTotal: converterMoedaParaNumero(row.cells[3].textContent)
         });
@@ -937,6 +934,10 @@ function gerarRelatorioXLSX() {
 /* ==== FIM SEÇÃO - RELATÓRIO ==== */
 
 /* ==== INÍCIO SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
+// mostrarPagina e outras funções agora estão *dentro* do escopo do módulo,
+// então elas são acessíveis por outras funções *dentro* do módulo,
+// e também são acessíveis via onclick no HTML.  Não precisamos mais
+// colocá-las no window.
 function mostrarPagina(idPagina) {
     const paginas = document.querySelectorAll('.pagina');
     paginas.forEach(pagina => {
@@ -945,6 +946,4 @@ function mostrarPagina(idPagina) {
 
     document.getElementById(idPagina).style.display = 'block';
 }
-
 /* ==== FIM SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
-
