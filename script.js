@@ -126,6 +126,7 @@ onAuthStateChanged(auth, (user) => {
 
 /* ==== FIM SEÇÃO - AUTENTICAÇÃO ==== */
 
+
 /* ==== INÍCIO SEÇÃO - CARREGAR DADOS DO FIREBASE ==== */
 async function carregarDados() {
     if (!usuarioAtual) {
@@ -1003,3 +1004,4 @@ function mostrarPagina(idPagina) {
 
 /* ==== FIM SEÇÃO - FUNÇÕES DE CONTROLE DE PÁGINA ==== */
     
+
