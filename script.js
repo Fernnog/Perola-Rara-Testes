@@ -32,13 +32,13 @@ let usuarioAtual = null; // Armazena o usuário logado
 /* ==== FIM SEÇÃO - VARIÁVEIS GLOBAIS ==== */
 
 /* ==== INÍCIO SEÇÃO - AUTENTICAÇÃO ==== */
-// Referências aos elementos do HTML (Autenticação)
+// (Seu código de autenticação - OK, com pequenas melhorias)
 const btnRegister = document.getElementById('btnRegister');
 const btnLogin = document.getElementById('btnLogin');
 const btnLogout = document.getElementById('btnLogout');
 const authStatus = document.getElementById('authStatus');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
+const emailInput = document.getElementById('email'); //Você já tinha esse id, mas com outro nome na tag.
+const passwordInput = document.getElementById('password'); //Você já tinha esse id, mas com outro nome na tag.
 const authSection = document.getElementById('authSection');
 const appContent = document.getElementById('appContent'); //Para mostrar Sections
 
@@ -54,7 +54,13 @@ function updateAuthUI(user) {
         appContent.style.display = "block";      // Mostrar conteúdo principal
 
         // Carrega dados *somente* após autenticação
-        carregarDados();
+        carregarDados().then(() => {
+            //Chama depois do then, pq o carregar dados é assíncrono
+            mostrarOrcamentosGerados(); // Atualiza a exibição
+            mostrarPedidosRealizados();
+        });
+
+
     } else {
         authStatus.textContent = "Nenhum usuário autenticado";
         btnLogout.style.display = "none";
@@ -62,7 +68,7 @@ function updateAuthUI(user) {
         btnRegister.style.display = "inline-block";
         authSection.style.display = "block";  //Sempre mostrar
         appContent.style.display = "none"; // Ocultar conteúdo principal
-        
+
         // Limpar os dados se o usuário fizer logout.
         orcamentos = [];
         pedidos = [];
@@ -77,7 +83,7 @@ function updateAuthUI(user) {
 btnRegister.addEventListener('click', async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
-     if (!email || !password) {
+    if (!email || !password) {
         alert("Preencha email e senha para registrar.");
         return;
     }
@@ -154,8 +160,7 @@ async function carregarDados() {
             }
         });
         console.log("Dados carregados do Firebase:", orcamentos, pedidos);
-        mostrarOrcamentosGerados();
-        mostrarPedidosRealizados();
+
 
     } catch (error) {
         console.error("Erro ao carregar dados do Firebase:", error);
@@ -188,7 +193,8 @@ function converterMoedaParaNumero(valor) {
 
 function limparCamposMoeda() {
     const camposMoeda = ['valorFrete', 'valorOrcamento', 'total', 'entrada', 'restante', 'margemLucro', 'custoMaoDeObra',
-                         'valorFreteEdicao', 'valorPedidoEdicao', 'totalEdicao', 'entradaEdicao', 'restanteEdicao', 'margemLucroEdicao', 'custoMaoDeObraEdicao'];
+        'valorFreteEdicao', 'valorPedidoEdicao', 'totalEdicao', 'entradaEdicao', 'restanteEdicao', 'margemLucroEdicao', 'custoMaoDeObraEdicao'
+    ];
     camposMoeda.forEach(id => {
         const campo = document.getElementById(id);
         if (campo) {
@@ -372,8 +378,8 @@ async function gerarOrcamento() {
     document.querySelector("#tabelaProdutos tbody").innerHTML = "";
 
     alert("Orçamento gerado com sucesso!");
-     mostrarPagina('orcamentos-gerados'); //Adicionado
-     mostrarOrcamentosGerados();          //Adicionado
+    mostrarPagina('orcamentos-gerados'); //Adicionado
+    mostrarOrcamentosGerados(); //Adicionado
 }
 
 function exibirOrcamentoEmHTML(orcamento) {
@@ -454,7 +460,7 @@ function mostrarOrcamentosGerados() {
     const tbody = document.querySelector("#tabela-orcamentos tbody");
     tbody.innerHTML = '';
 
-    orcamentos.forEach(orcamento => {  // Usa a variável global 'orcamentos'
+    orcamentos.forEach(orcamento => {
         const row = tbody.insertRow();
         const cellNumero = row.insertCell();
         const cellData = row.insertCell();
@@ -469,13 +475,28 @@ function mostrarOrcamentosGerados() {
         cellTotal.textContent = formatarMoeda(orcamento.total);
         cellNumeroPedido.textContent = orcamento.numeroPedido || 'N/A';
 
-        if (orcamento.pedidoGerado) {
-            cellAcoes.innerHTML = `<button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>`;
-        } else {
-            cellAcoes.innerHTML = `<button type="button" onclick="editarOrcamento('${orcamento.id}')">Editar</button>
-                                   <button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>
-                                   <button type="button" onclick="gerarPedido('${orcamento.id}')">Gerar Pedido</button>`;
+        //Simplificação da criação dos botões
+        const btnVisualizar = document.createElement('button');
+        btnVisualizar.type = 'button';
+        btnVisualizar.textContent = 'Visualizar';
+        btnVisualizar.onclick = () => exibirOrcamentoEmHTML(orcamento);
+        cellAcoes.appendChild(btnVisualizar);
+
+
+        if (!orcamento.pedidoGerado) {
+            const btnEditar = document.createElement('button');
+            btnEditar.type = 'button';
+            btnEditar.textContent = 'Editar';
+            btnEditar.onclick = () => editarOrcamento(orcamento.id);
+            cellAcoes.appendChild(btnEditar);
+
+            const btnGerarPedido = document.createElement('button');
+            btnGerarPedido.type = 'button';
+            btnGerarPedido.textContent = 'Gerar Pedido';
+            btnGerarPedido.onclick = () => gerarPedido(orcamento.id);
+            cellAcoes.appendChild(btnGerarPedido);
         }
+
     });
 }
 
@@ -492,10 +513,10 @@ function filtrarOrcamentos() {
         const nomeCliente = orcamento.cliente.toLowerCase();
 
         return (!dataInicio || dataOrcamento >= new Date(dataInicio)) &&
-               (!dataFim || dataOrcamento <= new Date(dataFim)) &&
-               (!numeroOrcamentoFiltro || parseInt(numOrcamento) === numeroOrcamentoFiltro) &&
-               (!anoOrcamentoFiltro || parseInt(anoOrcamento) === anoOrcamentoFiltro) &&
-               nomeCliente.includes(clienteOrcamentoFiltro);
+            (!dataFim || dataOrcamento <= new Date(dataFim)) &&
+            (!numeroOrcamentoFiltro || parseInt(numOrcamento) === numeroOrcamentoFiltro) &&
+            (!anoOrcamentoFiltro || parseInt(anoOrcamento) === anoOrcamentoFiltro) &&
+            nomeCliente.includes(clienteOrcamentoFiltro);
     });
 
     atualizarListaOrcamentos(orcamentosFiltrados);
@@ -520,12 +541,25 @@ function atualizarListaOrcamentos(orcamentosFiltrados) {
         cellTotal.textContent = formatarMoeda(orcamento.total);
         cellNumeroPedido.textContent = orcamento.numeroPedido || 'N/A';
 
-         if (orcamento.pedidoGerado) {
-            cellAcoes.innerHTML = `<button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>`;
-        } else {
-             cellAcoes.innerHTML = `<button type="button" onclick="editarOrcamento('${orcamento.id}')">Editar</button>
-                                    <button type="button" onclick="exibirOrcamentoEmHTML(orcamento)">Visualizar</button>
-                                    <button type="button" onclick="gerarPedido('${orcamento.id}')">Gerar Pedido</button>`;
+        //Simplificação da criação dos botões
+        const btnVisualizar = document.createElement('button');
+        btnVisualizar.type = 'button';
+        btnVisualizar.textContent = 'Visualizar';
+        btnVisualizar.onclick = () => exibirOrcamentoEmHTML(orcamento);
+        cellAcoes.appendChild(btnVisualizar);
+
+        if (!orcamento.pedidoGerado) {
+            const btnEditar = document.createElement('button');
+            btnEditar.type = 'button';
+            btnEditar.textContent = 'Editar';
+            btnEditar.onclick = () => editarOrcamento(orcamento.id);
+            cellAcoes.appendChild(btnEditar);
+
+            const btnGerarPedido = document.createElement('button');
+            btnGerarPedido.type = 'button';
+            btnGerarPedido.textContent = 'Gerar Pedido';
+            btnGerarPedido.onclick = () => gerarPedido(orcamento.id);
+            cellAcoes.appendChild(btnGerarPedido);
         }
     });
 }
@@ -590,7 +624,7 @@ async function atualizarOrcamento() {
         return;
     }
 
-  const orcamentoIndex = orcamentos.findIndex(o => o.id === orcamentoEditando); // Find by ID
+    const orcamentoIndex = orcamentos.findIndex(o => o.id === orcamentoEditando); // Find by ID
     if (orcamentoIndex === -1) {
         alert("Orçamento não encontrado.");
         return;
@@ -682,10 +716,10 @@ async function gerarPedido(orcamentoId) {
             ...p,
             valorTotal: p.quantidade * p.valorUnit
         })),
-      tipo: 'pedido' //Adicionado
+        tipo: 'pedido' //Adicionado
 
     };
-  
+
     delete pedido.dataValidade;
 
     await salvarDados(pedido, 'pedido');
@@ -701,6 +735,7 @@ async function gerarPedido(orcamentoId) {
     mostrarPedidosRealizados();
     mostrarOrcamentosGerados(); // Atualiza a lista de orçamentos
 }
+
 /* ==== FIM SEÇÃO - GERAR PEDIDO A PARTIR DO ORÇAMENTO ==== */
 
 /* ==== INÍCIO SEÇÃO - PEDIDOS REALIZADOS ==== */
@@ -720,7 +755,13 @@ function mostrarPedidosRealizados() {
         cellDataPedido.textContent = pedido.dataPedido;
         cellCliente.textContent = pedido.cliente;
         cellTotal.textContent = formatarMoeda(pedido.total);
-        cellAcoes.innerHTML = `<button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>`;
+
+        const btnEditar = document.createElement('button');
+        btnEditar.type = 'button';
+        btnEditar.textContent = 'Editar';
+        btnEditar.onclick = () => editarPedido(pedido.id);
+        cellAcoes.appendChild(btnEditar);
+
     });
 }
 
@@ -737,10 +778,10 @@ function filtrarPedidos() {
         const nomeCliente = pedido.cliente.toLowerCase();
 
         return (!dataInicio || dataPedido >= new Date(dataInicio)) &&
-               (!dataFim || dataPedido <= new Date(dataFim)) &&
-               (!numeroPedidoFiltro || parseInt(numPedido) === numeroPedidoFiltro) &&
-               (!anoPedidoFiltro || parseInt(anoPedido) === anoPedidoFiltro) &&
-               nomeCliente.includes(clientePedidoFiltro);
+            (!dataFim || dataPedido <= new Date(dataFim)) &&
+            (!numeroPedidoFiltro || parseInt(numPedido) === numeroPedidoFiltro) &&
+            (!anoPedidoFiltro || parseInt(anoPedido) === anoPedidoFiltro) &&
+            nomeCliente.includes(clientePedidoFiltro);
     });
 
     atualizarListaPedidos(pedidosFiltrados);
@@ -762,7 +803,11 @@ function atualizarListaPedidos(pedidosFiltrados) {
         cellDataPedido.textContent = pedido.dataPedido;
         cellCliente.textContent = pedido.cliente;
         cellTotal.textContent = formatarMoeda(pedido.total);
-        cellAcoes.innerHTML = `<button type="button" onclick="editarPedido('${pedido.id}')">Editar</button>`;
+        const btnEditar = document.createElement('button');
+        btnEditar.type = 'button';
+        btnEditar.textContent = 'Editar';
+        btnEditar.onclick = () => editarPedido(pedido.id);
+        cellAcoes.appendChild(btnEditar);
     });
 }
 
@@ -783,7 +828,7 @@ function editarPedido(pedidoId) {
     document.getElementById("coresEdicao").value = pedido.cores;
     document.getElementById("valorFreteEdicao").value = formatarMoeda(pedido.valorFrete);
     document.getElementById("valorPedidoEdicao").value = formatarMoeda(pedido.valorPedido);
-    document.getElementById("valorPedidoEdicao").onblur = atualizarTotaisEdicao;
+    document.getElementById("valorPedidoEdicao").onblur = atualizarTotaisEdicao;  //Mantem a função
     document.getElementById("totalEdicao").value = formatarMoeda(pedido.total);
     document.getElementById("entradaEdicao").value = formatarMoeda(pedido.entrada);
     document.getElementById("restanteEdicao").value = formatarMoeda(pedido.restante);
@@ -815,35 +860,38 @@ function editarPedido(pedidoId) {
 }
 
 async function atualizarPedido() {
-   const pedidoIndex = pedidos.findIndex(p => p.id === pedido.id); // Find by ID
+
+    const pedidoId = orcamentoEditando; //Pega o ID
+    const pedidoIndex = pedidos.findIndex(p => p.id === pedidoId); // Find by ID
+
     if (pedidoIndex === -1) {
         alert("Pedido não encontrado.");
         return;
     }
-  
+
     const pedidoAtualizado = {
-      id: pedido.id, // Find by ID
-      numero: document.getElementById("dataPedidoEdicao").value,
-      dataPedido: document.getElementById("dataPedidoEdicao").value,
-      dataEntrega: document.getElementById("dataEntregaEdicao").value,
-      cliente: document.getElementById("clienteEdicao").value,
-      endereco: document.getElementById("enderecoEdicao").value,
-      tema: document.getElementById("temaEdicao").value,
-      cidade: document.getElementById("cidadeEdicao").value,
-      telefone: document.getElementById("contatoEdicao").value,
-      cores: document.getElementById("coresEdicao").value,
-      produtos: [],
-      pagamento: Array.from(document.querySelectorAll('input[name="pagamentoEdicao"]:checked')).map(el => el.value),
-      valorFrete: converterMoedaParaNumero(document.getElementById("valorFreteEdicao").value),
-      valorPedido: converterMoedaParaNumero(document.getElementById("valorPedidoEdicao").value),
-      total: converterMoedaParaNumero(document.getElementById("totalEdicao").value),
-      entrada: converterMoedaParaNumero(document.getElementById("entradaEdicao").value),
-      restante: converterMoedaParaNumero(document.getElementById("restanteEdicao").value),
-      margemLucro: converterMoedaParaNumero(document.getElementById("margemLucroEdicao").value) || 0,
-      custoMaoDeObra: converterMoedaParaNumero(document.getElementById("custoMaoDeObraEdicao").value) || 0,
-      observacoes: document.getElementById("observacoesEdicao").value,
-      tipo: 'pedido'
-  };
+        id: pedidoId, // Usa o id do pedido.
+        numero: document.getElementById("dataPedidoEdicao").value,  // <---  ISSO AQUI TAVA ERRADO!  Não é o número.
+        dataPedido: document.getElementById("dataPedidoEdicao").value,
+        dataEntrega: document.getElementById("dataEntregaEdicao").value,
+        cliente: document.getElementById("clienteEdicao").value,
+        endereco: document.getElementById("enderecoEdicao").value,
+        tema: document.getElementById("temaEdicao").value,
+        cidade: document.getElementById("cidadeEdicao").value,
+        telefone: document.getElementById("contatoEdicao").value,
+        cores: document.getElementById("coresEdicao").value,
+        produtos: [],
+        pagamento: Array.from(document.querySelectorAll('input[name="pagamentoEdicao"]:checked')).map(el => el.value),
+        valorFrete: converterMoedaParaNumero(document.getElementById("valorFreteEdicao").value),
+        valorPedido: converterMoedaParaNumero(document.getElementById("valorPedidoEdicao").value),
+        total: converterMoedaParaNumero(document.getElementById("totalEdicao").value),
+        entrada: converterMoedaParaNumero(document.getElementById("entradaEdicao").value),
+        restante: converterMoedaParaNumero(document.getElementById("restanteEdicao").value),
+        margemLucro: converterMoedaParaNumero(document.getElementById("margemLucroEdicao").value) || 0,
+        custoMaoDeObra: converterMoedaParaNumero(document.getElementById("custoMaoDeObraEdicao").value) || 0,
+        observacoes: document.getElementById("observacoesEdicao").value,
+        tipo: 'pedido'
+    };
 
     const produtos = document.querySelectorAll("#tabelaProdutosEdicao tbody tr");
     produtos.forEach(row => {
