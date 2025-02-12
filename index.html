@@ -10,63 +10,28 @@
     <!-- Adicionando a biblioteca SheetJS (xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-    <!-- Firebase App (the core Firebase SDK) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <!-- Firebase App (base) -->
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
 
-    <!-- Firebase Authentication -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <!-- Firebase Analytics (opcional, mas recomendado) -->
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js"></script>
 
-    <!-- Firebase Realtime Database -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
 
-    <script>
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "perola-rara-ae5bc.firebaseapp.com",
-            projectId: "perola-rara-ae5bc",
-            storageBucket: "perola-rara-ae5bc.firebasestorage.app",
-            messagingSenderId: "968229137782",
-            appId: "1:968229137782:web:682d4e0e851bf0e3f41e57",
-            measurementId: "G-D0KYCNJW4P" // Mantive o measurementId, caso esteja usando Analytics
-        };
+    <!-- Adicione depois, se quiser usar autenticação
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+     -->
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
-    </script>
+    <script type="module" src="./script.js"></script>  <!-- Seu script agora é um módulo -->
 
-    <script src="./script.js"></script>
 </head>
 <!-- ==== FIM SEÇÃO - HEAD ==== -->
 <body>
-
-    <!-- ==== INÍCIO SEÇÃO - LOGIN ==== -->
-    <section id="login-section" style="display: none;">
-        <h2>Login</h2>
-        <form id="login-form">
-            <div class="form-group">
-                <label for="login-email">Email:</label>
-                <input type="email" id="login-email" required>
-            </div>
-            <div class="form-group">
-                <label for="login-password">Senha:</label>
-                <input type="password" id="login-password" required>
-            </div>
-            <button type="submit">Entrar</button>
-            <button type="button" id="btn-create-account">Criar Conta</button> <!-- Botão para criar conta -->
-        </form>
-        <div id="login-message"></div> <!-- Para exibir mensagens de erro/sucesso -->
-    </section>
-    <!-- ==== FIM SEÇÃO - LOGIN ==== -->
-
     <div class="container">
         <!-- ==== INÍCIO SEÇÃO - CABEÇALHO ==== -->
         <header>
-            <div class="top-bar">
-                <div id="ultimoBackupFirebase" class="ultimo-backup"></div>
-            </div>
+            <!-- Removido o painel de último backup -->
             <div class="logo-container">
                 <img src="./logo_perola_rara.png" alt="Logo Pérola Rara" id="logo">
             </div>
@@ -78,9 +43,8 @@
         <li><a href="#" onclick="mostrarPagina('orcamentos-gerados'); mostrarOrcamentosGerados()">Orçamentos Gerados</a></li>
         <li><a href="#" onclick="mostrarPagina('lista-pedidos'); mostrarPedidosRealizados()">Pedidos Realizados</a></li>
         <li><a href="#" onclick="mostrarPagina('relatorio')">Relatório</a></li>
-        <li><a href="precificacao/precificacao.html">Precificação</a></li>
-        <li><a href="#" onclick="mostrarPagina('backup');">Importar/Exportar</a></li>
-        <!-- REMOVIDO O MENU LIMPAR PÁGINA -->
+        <!-- REMOVIDO O LINK DE IMPORTAR/EXPORTAR -->
+        <li><a href="#" onclick="limparPagina()">Limpar Página</a></li>
     </ul>
 </nav>
             <hr class="menu">
@@ -267,7 +231,121 @@
             <hr class="subtitulo">
             <form id="edicaoPedido">
                 <!-- Campos do formulário (semelhantes ao formulário de orçamento) -->
-                <section id="relatorio" class="pagina" style="display:none;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dataPedidoEdicao">Data do Pedido:</label>
+                        <input type="date" id="dataPedidoEdicao" name="dataPedidoEdicao">
+                    </div>
+                    <div class="form-group">
+                        <label for="dataEntregaEdicao">Data da Entrega:</label>
+                        <input type="date" id="dataEntregaEdicao" name="dataEntregaEdicao">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clienteEdicao">Cliente:</label>
+                        <input type="text" id="clienteEdicao" name="clienteEdicao" placeholder="Nome do Cliente">
+                    </div>
+                    <div class="form-group">
+                        <label for="enderecoEdicao">Endereço:</label>
+                        <input type="text" id="enderecoEdicao" name="enderecoEdicao" placeholder="Endereço do Cliente">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="temaEdicao">Tema:</label>
+                        <input type="text" id="temaEdicao" name="temaEdicao" placeholder="Tema do Pedido">
+                    </div>
+                    <div class="form-group">
+                        <label for="cidadeEdicao">Cidade:</label>
+                        <input type="text" id="cidadeEdicao" name="cidadeEdicao" placeholder="Cidade do Cliente">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contatoEdicao">Contato:</label>
+                        <input type="text" id="contatoEdicao" name="contatoEdicao" placeholder="Telefone, Email, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label for="coresEdicao">Cores:</label>
+                        <input type="text" id="coresEdicao" name="coresEdicao" placeholder="Cores Preferidas">
+                    </div>
+                </div>
+                <hr class="tabela">
+                <div class="table-responsive">
+                    <table id="tabelaProdutosEdicao">
+                        <thead>
+                            <tr>
+                                <th>Quantidade</th>
+                                <th>Descrição do Produto</th>
+                                <th>Valor Unit.</th>
+                                <th>Valor Total</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Linhas de produtos serão adicionadas aqui -->
+                        </tbody>
+                    </table>
+                    <button type="button" onclick="adicionarProdutoEdicao()">Adicionar Produto</button>
+                </div>
+                <hr class="final-tabela">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Pagamento:</label>
+                        <label><input type="checkbox" name="pagamentoEdicao" value="pix"> PIX</label>
+                        <label><input type="checkbox" name="pagamentoEdicao" value="dinheiro"> Dinheiro</label>
+                        <label><input type="checkbox" name="pagamentoEdicao" value="cartaoCredito"> Cartão de Crédito</label>
+                        <label><input type="checkbox" name="pagamentoEdicao" value="cartaoDebito"> Cartão de Débito</label>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="valorFreteEdicao">Valor do Frete (R$):</label>
+                        <input type="text" id="valorFreteEdicao" name="valorFreteEdicao" value="0,00" oninput="formatarEntradaMoeda(this)" onblur="atualizarTotaisEdicao()">
+                    </div>
+                    <div class="form-group">
+                        <label for="valorPedidoEdicao">Valor do Pedido (R$):</label>
+                        <input type="text" id="valorPedidoEdicao" name="valorPedidoEdicao" value="0,00" oninput="formatarEntradaMoeda(this)" onblur="atualizarTotaisEdicao()">
+                    </div>
+                </div>
+                <div class="form-row valores-pedido">
+                    <div class="form-group">
+                        <label for="custoMaoDeObraEdicao">Custo de mão de obra (R$):</label>
+                        <input type="text" id="custoMaoDeObraEdicao" name="custoMaoDeObraEdicao" value="0,00" oninput="formatarEntradaMoeda(this)">
+                    </div>
+                    <div class="form-group">
+                        <label for="margemLucroEdicao">Margem de Lucro (R$):</label>
+                        <input type="text" id="margemLucroEdicao" name="margemLucroEdicao" value="0,00" oninput="formatarEntradaMoeda(this)">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="totalEdicao">Total (R$):</label>
+                        <input type="text" id="totalEdicao" name="totalEdicao" value="0,00" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="entradaEdicao">Entrada (R$):</label>
+                        <input type="text" id="entradaEdicao" name="entradaEdicao" value="0,00" oninput="formatarEntradaMoeda(this)" onblur="atualizarRestanteEdicao()">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="restanteEdicao">Restante (R$):</label>
+                        <input type="text" id="restanteEdicao" name="restanteEdicao" value="0,00" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="observacoesEdicao">Observações:</label>
+                    <textarea id="observacoesEdicao" name="observacoesEdicao" rows="4"></textarea>
+                </div>
+                <button type="button" onclick="atualizarPedido()">Salvar Alterações</button>
+            </form>
+        </section>
+        <!-- ==== FIM SEÇÃO - FORMULÁRIO DE EDIÇÃO DE PEDIDO ==== -->
+
+        <!-- ==== INÍCIO SEÇÃO - RELATÓRIO ==== -->
+        <section id="relatorio" class="pagina" style="display:none;">
             <h2>Relatório de Pedidos</h2>
             <div class="filtro-data">
                 <label for="filtroDataInicio">Início:</label>
@@ -283,20 +361,7 @@
         </section>
         <!-- ==== FIM SEÇÃO - RELATÓRIO ==== -->
 
-        <!-- ==== INÍCIO SEÇÃO - IMPORTAR EXPORTAR ==== -->
-        <section id="backup" class="pagina" style="display:none;">
-            <h2>Importar e Exportar Dados</h2>
-
-            <div>
-                <input type="file" id="inputImportar" accept=".json">
-                <button type="button" onclick="importarDados()">Importar Dados</button>
-            </div>
-
-            <div>
-                <button type="button" onclick="exportarDados()">Exportar Dados</button>
-            </div>
-        </section>
-        <!-- ==== FIM SEÇÃO - IMPORTAR EXPORTAR ==== -->
+        <!-- ==== REMOVIDA A SEÇÃO - IMPORTAR EXPORTAR ==== -->
 
         <!-- ==== INÍCIO SEÇÃO - VISUALIZAR ORÇAMENTO ==== -->
         <section id="visualizar-orcamento" class="pagina" style="display:none;">
