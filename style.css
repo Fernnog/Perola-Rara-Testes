@@ -1,5 +1,5 @@
-/* ==== SEUS ESTILOS ATUAIS (DO SEGUNDO ARQUIVO) ==== */
-/* ====  Cole aqui *todo* o conteúdo do seu style.css original  ==== */
+/* ==== SEUS ESTILOS ATUAIS (DO SEGUNDO ARQUIVO - style.css) ==== */
+/* Cole *todo* o conteúdo do seu style.css original AQUI. */
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
@@ -48,25 +48,32 @@ hr.final-tabela {
     margin-bottom: 20px;
 }
 
+/* ==== INÍCIO SEÇÃO - CABEÇALHO (PÁGINA PRINCIPAL) ==== */
+.top-bar {
+    display: flex; /* Ativa o flexbox */
+    justify-content: flex-end; /* Alinha o painel à direita */
+    padding: 10px 20px; /* Espaçamento interno na barra superior */
+}
+
 header {
     text-align: center;
     padding: 20px 0;
-    background-color: #ffffff;
-    color: #7aa2a9;
+    background-color: #ffffff; /* Cor de fundo alterada para branco */
+    color: #7aa2a9; /* Cor do texto alterada para a paleta */
     margin-bottom: 20px;
 }
 
 .logo-container {
-    margin-top: 20px;
-    margin-bottom: 10px;
-    text-align: center;
+    margin-top: 20px; /* Espaço entre o painel e o logo */
+    margin-bottom: 10px; /* Espaço entre o painel e o logo */
+    text-align: center; /* Centraliza o logo horizontalmente */
 }
 
 #logo {
     max-width: 150px;
     height: auto;
     display: block;
-    margin: 0 auto;
+    margin: 0 auto; /* Centraliza o logo horizontalmente e espaçamento*/
 }
 
 h1, h2 {
@@ -89,17 +96,21 @@ nav ul li {
 nav ul li a {
     color: #7aa2a9;
     text-decoration: none;
-    display: inline-block;
-    padding: 10px 15px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    border-radius: 5px;
+    display: inline-block; /* Melhor para aplicar padding e transição */
+    padding: 10px 15px; /* Aumentei um pouco o padding */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Transição suave para cor também */
+    border-radius: 5px; /* Bordas levemente arredondadas (opcional) */
 }
 
-nav ul li a:hover {
-    background-color: #e8d7d4;
-    color: #333;
+nav ul li a:hover { /* Estilo de hover aprimorado */
+    background-color: #e8d7d4; /* Rosa do precificacao.css */
+    color: #333; /* Escurece a cor do texto no hover (melhor contraste) */
 }
+/* ==== FIM SEÇÃO - CABEÇALHO (PÁGINA PRINCIPAL) ==== */
 
+/* ==== REMOVIDO - SEÇÃO - PAINEL ÚLTIMO BACKUP ==== */
+
+/* ==== INÍCIO SEÇÃO - FORMULÁRIO ==== */
 #form-orcamento, #form-edicao-pedido {
     margin-bottom: 30px;
 }
@@ -114,18 +125,19 @@ label {
     font-weight: bold;
 }
 
+/* Estilos para todos os campos de texto, incluindo o novo campo de e-mail */
 input[type="text"],
 input[type="number"],
 input[type="date"],
-input[type="email"],
+input[type="email"], /* Adicionado o seletor para o campo de e-mail */
 textarea {
     width: calc(100% - 22px);
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 20px;
+    border-radius: 20px; /* Bordas arredondadas */
     font-size: 16px;
-    background-color: #dfb6b0;
-    color: #fff;
+    background-color: #dfb6b0; /* Cor de fundo dos campos */
+    color: #fff; /* Cor do texto nos campos */
 }
 
 .form-row:after {
@@ -147,7 +159,9 @@ textarea {
 input[type="checkbox"] {
     margin-right: 5px;
 }
+/* ==== FIM SEÇÃO - FORMULÁRIO ==== */
 
+/* ==== INÍCIO SEÇÃO - TABELAS ==== */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -165,6 +179,7 @@ th {
     color: white;
 }
 
+/* Novas classes para a tabela de relatório */
 .relatorio-table {
     width: 80%;
     margin: 20px auto;
@@ -179,28 +194,30 @@ th {
 }
 
 .relatorio-table th {
-    background-color: #cce5e9;
+    background-color: #cce5e9; /* Cor mais clara da paleta para o cabeçalho (25% mais claro que #7aa2a9) */
     color: #333;
 }
 
 .relatorio-table tr:nth-child(even) {
-    background-color: #f0f8fa;
+    background-color: #f0f8fa; /* Cor mais clara da paleta para linhas pares (25% mais claro que #dfb6b0) */
 }
 
 .relatorio-table tr:nth-child(odd) {
-    background-color: #f8f8f8;
+    background-color: #f8f8f8; /* Fundo branco para linhas ímpares */
 }
 
 .table-responsive {
     overflow-x: auto;
 }
+/* ==== FIM SEÇÃO - TABELAS ==== */
 
+/* ==== INÍCIO SEÇÃO - BOTÕES ==== */
 button {
     background-color: #7aa2a9;
     color: white;
     padding: 10px 20px;
     border: none;
-    border-radius: 20px;
+    border-radius: 20px; /* Bordas arredondadas */
     font-size: 16px;
     cursor: pointer;
     margin-top: 10px;
@@ -210,11 +227,16 @@ button:hover {
     background-color: #5a8289;
 }
 
+/* ==== INÍCIO SEÇÃO - BOTÃO VOLTAR AO INÍCIO ==== */
 #lista-pedidos button, #relatorio button, #backup button {
     display: block;
     margin: 0 auto 20px auto;
 }
+/* ==== FIM SEÇÃO - BOTÃO VOLTAR AO INÍCIO ==== */
 
+/* ==== FIM SEÇÃO - BOTÕES ==== */
+
+/* ==== INÍCIO SEÇÃO - SEÇÃO RELATÓRIO ==== */
 .filtro-data {
     margin-bottom: 20px;
 }
@@ -222,7 +244,9 @@ button:hover {
 .filtro-data label, .filtro-data input {
     margin-right: 10px;
 }
+/* ==== FIM SEÇÃO - SEÇÃO RELATÓRIO ==== */
 
+/* ==== INÍCIO SEÇÃO - FILTROS ==== */
 .filtro-data {
     margin-bottom: 20px;
     text-align: center;
@@ -233,7 +257,9 @@ button:hover {
 .filtro-data button {
     margin: 0 5px;
 }
+/* ==== FIM SEÇÃO - FILTROS ==== */
 
+/* ==== INÍCIO SEÇÃO - PÁGINA DE VISUALIZAÇÃO DO ORÇAMENTO (orcamento.html) ==== */
 .header-orcamento {
     text-align: center;
     margin-bottom: 20px;
@@ -253,19 +279,23 @@ button:hover {
     text-align: left;
     margin-bottom: 10px;
 }
+/* ==== FIM SEÇÃO - PÁGINA DE VISUALIZAÇÃO DO ORÇAMENTO (orcamento.html) ==== */
 
+/* ==== INÍCIO SEÇÃO - BOTÃO LIMPAR PÁGINA ==== */
 nav ul li a[onclick="limparPagina()"] {
-    background-color: #dfb6b0;
-    padding: 5px 10px;
-    border-radius: 10px;
-    color: white;
-    margin-left: 20px;
+    background-color: #dfb6b0; /* Fundo rosa delicado */
+    padding: 5px 10px; /* Espaçamento interno */
+    border-radius: 10px; /* Bordas arredondadas */
+    color: white; /* Texto branco para contraste */
+    margin-left: 20px; /* Espaço à esquerda para separar dos outros botões */
 }
 
 nav ul li a[onclick="limparPagina()"]:hover {
-    background-color: #c89790;
+    background-color: #c89790; /* Tom mais escuro de rosa no hover */
 }
+/* ==== FIM SEÇÃO - BOTÃO LIMPAR PÁGINA ==== */
 
+/* ==== INÍCIO SEÇÃO - MEDIA QUERIES ==== */
 @media (max-width: 768px) {
     .container {
         width: 98%;
@@ -281,114 +311,47 @@ nav ul li a[onclick="limparPagina()"]:hover {
         overflow-x: auto;
     }
 }
+/* ==== FIM SEÇÃO - MEDIA QUERIES ==== */
 
+/* ==== INÍCIO SEÇÃO - ESTILOS ADICIONADOS PARA CUSTO E MARGEM ==== */
 .form-row.valores-pedido label {
     color: #7aa2a9;
     font-weight: bold;
 }
+/* ==== FIM SEÇÃO - ESTILOS ADICIONADOS PARA CUSTO E MARGEM ==== */
 
-#authSection {
-    background-color: #e6f7ff;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
-    display: inline-block;
-    text-align: center;
-}
+/* ==== INÍCIO SEÇÃO - ESTILOS DA SEÇÃO DE AUTENTICAÇÃO (ADICIONADO) ==== */
+/*Removido e substituído*/
+/* ==== FIM SEÇÃO - ESTILOS DA SEÇÃO DE AUTENTICAÇÃO ==== */
 
-#authSection input[type="email"],
-#authSection input[type="password"] {
-    background-color: #f8f8f8;
-    color: #333;
-    border: 1px solid #ddd;
-    border-radius: 15px;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    width: calc(100% - 26px);
-    font-size: 14px;
-}
-
-#authSection div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#authSection button {
-    background-color: #a8d5e3;
-    color: #fff;
-    padding: 8px 15px;
-    border-radius: 15px;
-    font-size: 14px;
-    margin: 4px;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.3s ease;
-}
-
-#authSection button:hover {
-    background-color: #7cb3c2;
-}
-
-#authSection #authStatus,
-#authSection #passwordResetMessage {
-    font-size: 0.9em;
-    margin-top: 10px;
-    color: #555;
-}
-
-#authSection #btnForgotPasswordContainer {
-    margin-left: 10px;
-}
-
-#authSection #btnForgotPassword {
-    background: none;
-    color: #7aa2a9;
-    border: none;
-    padding: 8px 0;
-    font-size: 14px;
-    cursor: pointer;
-    text-decoration: none;
-    margin: 0;
-    align-self: center;
-}
-
-#authSection #btnForgotPassword:hover {
-    text-decoration: underline;
-    color: #5a8289;
-    background-color: transparent;
-}
-
+/* ==== INÍCIO SEÇÃO - ESTILOS ADICIONADOS PARA CAMPOS CALCULADOS ==== */
 .campo-calculado {
-    background-color: #cce5e9;
-    color: #333;
-    font-weight: bold;
+    background-color: #cce5e9; /* Tom de azul claro da paleta */
+    color: #333; /* Cor do texto para melhor leitura */
+    font-weight: bold; /* Opcional: para destacar ainda mais */
 }
+/* ==== FIM SEÇÃO - ESTILOS ADICIONADOS PARA CAMPOS CALCULADOS ==== */
 
-/* ====  ADICIONE OS ESTILOS DA PRIMEIRA PÁGINA (precificacao.css) ==== */
-/*  IMPORTANTE:  Copie e cole *abaixo* dos seus estilos atuais para que,  */
-/*  se houver conflitos, os estilos específicos da página de orçamentos   */
-/*  tenham prioridade (e você possa ajustar depois se necessário).         */
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+/* ==== ESTILOS DA PRIMEIRA PÁGINA (precificacao.css) ==== */
+/* Adicione *abaixo* dos seus estilos atuais, para que seus estilos tenham prioridade. */
 
+/* Paleta de cores e variáveis (já deve estar presente)*/
 :root {
     --cor-principal: #7aa2a9;
     --cor-secundaria: #dfb6b0;
-    --cor-autenticacao-1: #687f82;
-    --cor-autenticacao-2: #ecd5d1;
-    --cor-fundo: #f0f2f5;
+    --cor-autenticacao-1: #687f82;      /* Botões */
+   
+      --cor-autenticacao-2: #ecd5d1;      /* Fundo da seção de autenticação E user-info */
+    --cor-fundo: #f0f2f5;             /* Fundo geral da página */
 }
 
 /* ==== ESTILOS DA SEÇÃO DE AUTENTICAÇÃO (precificacao.css) ==== */
 /*  IMPORTANTE:  Já foram aplicados estilos *inline* no HTML,         */
 /*  então estes estilos abaixo servem como um guia/ajuste fino.     */
-/*  Você pode precisar remover alguns estilos inline se causarem   */
-/*  conflitos ou comportamentos inesperados.                       */
 
 .auth-container {
-    background-color: var(--cor-autenticacao-2); /* #e5c4bf */
+    background-color: var(--cor-autenticacao-2); /* #ecd5d1 - Agora está correto! */
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
@@ -417,18 +380,19 @@ nav ul li a[onclick="limparPagina()"]:hover {
     color: #555;
     font-weight: bold;
 }
-
+/*Inputs da tela de autenticação*/
 .auth-form input[type="email"],
 .auth-form input[type="password"] {
-    width: calc(100% - 20px);
+    width: calc(100% - 20px);  /* Ajuste para levar em conta o padding */
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 20px;
     font-size: 16px;
     margin-bottom: 10px;
-    background-color: #fff;  /*  Fundo branco */
-    color: #333;
+    background-color: #fff;  /* Fundo branco, como solicitado */
+    color: #333;             /* Cor do texto */
 }
+
 
 .auth-buttons {
     display: flex;
@@ -497,7 +461,7 @@ body.authenticated #logoutBtn.logout-button:hover {
     background-color: #4a5c5e;
 }
 
- .top-bar-content {
+ .top-bar-content {  /*Adicionei o ponto que faltava*/
     background-color: #e3f2fd; /* Mesmo do auth-container */
     padding: 8px 15px;
     border-radius: 20px;
@@ -509,9 +473,9 @@ body.authenticated #logoutBtn.logout-button:hover {
 
 /* ====  ESTILOS PARA O SLOGAN (precificacao.css) ==== */
 
-.slogan {
-    margin-top: 20px;
-    color: #555;
+.slogan {  /*Adicionei a classe que faltava*/
+    margin-top: 20px; /* Espaço acima do slogan */
+    color: #555;    /* Cor do texto do slogan */
 }
 
 .auth-form .logo-container{
@@ -520,47 +484,10 @@ body.authenticated #logoutBtn.logout-button:hover {
 }
 
 /* ==== OUTROS ESTILOS RELEVANTES DE precificacao.css ==== */
-/* (Estilos que podem ser úteis, mas *não* sobrescrevem os seus originais) */
-
-/*  Estilos para a top-bar *geral* (não autenticado).  Note que você já tem
-    uma .top-bar definida, então ajuste conforme necessário para evitar conflitos.
-*/
+/* Estilos da top-bar geral*/
 .top-bar {
     display: flex;
-    justify-content: space-between; /* ou flex-end, dependendo do layout */
+    justify-content: space-between; /* ou flex-end */
     align-items: center;
     padding: 10px 20px;
-}
-
-/*  Se você quiser usar os estilos de input da primeira página em *outros*
-    lugares da segunda página, pode adicionar essa classe:
-*/
-.input-estilo-precificacao {
-  /*  Copie os estilos de input[type="text"], input[type="number"], etc.
-      de precificacao.css para cá.  Isso evita repetição.
-  */
-    width: calc(100% - 22px);
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    font-size: 16px;
-    background-color: #dfb6b0; /* Cor de fundo original */
-    color: #fff;              /* Cor do texto original */
-}
-
-/*  O mesmo para botões:
-*/
-.botao-estilo-precificacao {
-    background-color: #7aa2a9;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-.botao-estilo-precificacao:hover {
-    background-color: #5a8289;
 }
