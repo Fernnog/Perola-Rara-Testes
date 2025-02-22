@@ -13,7 +13,7 @@
     <script type="module" src="./script.js"></script> <!-- SEU ARQUIVO JAVASCRIPT -->
 </head>
 <body>
-    <!-- ==== INÍCIO SEÇÃO - AUTENTICAÇÃO (COPIADO DA PRIMEIRA PÁGINA) ==== -->
+    <!-- ==== INÍCIO SEÇÃO - AUTENTICAÇÃO (CORRIGIDO) ==== -->
     <div id="auth-container" class="auth-container">
         <div class="auth-form">
             <div class="logo-container">
@@ -34,15 +34,16 @@
             </div>
             <button type="button" id="forgotPasswordBtn" class="forgot-password">Esqueci minha senha?</button>
             <p id="auth-message" class="auth-message">Nenhum usuário autenticado</p>
+             <!-- Slogan (Adicionado) -->
             <p class="slogan"><strong><em>"Pérola Rara, onde a arte se encontra com o amor em cada detalhe".</em></strong></p>
         </div>
     </div>
     <!-- ==== FIM SEÇÃO - AUTENTICAÇÃO ==== -->
 
-    <div id="app-container" style="display: none;" class="container">  <!-- O container principal agora tem display: none inicialmente -->
+    <div id="app-container" style="display: none;" class="container">
 
-        <!-- ==== INÍCIO SEÇÃO - CABEÇALHO (COM BARRA SUPERIOR) ==== -->
-       <header>
+        <!-- ==== INÍCIO SEÇÃO - CABEÇALHO ==== -->
+        <header>
             <div class="top-bar">
                 <div class="top-bar-content">
                     <div id="user-info" class="user-info"></div>
@@ -60,15 +61,15 @@
                     <li><a href="#" data-pagina="orcamentos-gerados">Orçamentos Gerados</a></li>
                     <li><a href="#" data-pagina="lista-pedidos">Pedidos Realizados</a></li>
                     <li><a href="#" data-pagina="relatorio">Relatório</a></li>
-                    <!-- REMOVIDO o link Limpar Página -->
                 </ul>
             </nav>
             <hr class="menu">
         </header>
         <!-- ==== FIM SEÇÃO - CABEÇALHO ==== -->
 
-      <!-- ==== Conteúdo da Aplicação (o restante do seu HTML original) ==== -->
-      <div id="appContent">  <!--  Essa div envolve *todo* o conteúdo, menos a autenticação. -->
+        <!-- ==== Conteúdo da Aplicação ==== -->
+        <div id="appContent">
+           <!-- (O restante do seu HTML original - seções de orçamento, pedidos, etc. - permanece aqui, inalterado) -->
 
         <!-- ==== INÍCIO SEÇÃO - FORMULÁRIO DE ORÇAMENTO ==== -->
         <section id="form-orcamento" class="pagina">
