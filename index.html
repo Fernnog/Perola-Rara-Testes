@@ -4,17 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pérola Rara - Gerenciamento de Pedidos</title>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./style.css">  <!-- SEU ARQUIVO CSS -->
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon"> <!-- SE TIVER UM FAVICON -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Adicionando a biblioteca SheetJS (xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <!-- O script principal será type="module" e importará o Firebase -->
-    <script type="module" src="./script.js"></script>
+    <script type="module" src="./script.js"></script> <!-- SEU ARQUIVO JAVASCRIPT -->
 </head>
 <body>
-    <div class="container">
-        <!-- ==== INÍCIO SEÇÃO - CABEÇALHO ==== -->
-        <header>
+    <!-- ==== INÍCIO SEÇÃO - AUTENTICAÇÃO (COPIADO DA PRIMEIRA PÁGINA) ==== -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-form">
+            <div class="logo-container">
+                <img src="logo_perola_rara.png" alt="Logo Pérola Rara" id="logo">
+            </div>
+            <h2>Autenticação</h2>
+            <div class="form-group">
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email" placeholder="Digite seu email">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha:</label><br>
+                <input type="password" id="password" name="password" placeholder="Digite sua senha">
+            </div>
+            <div class="auth-buttons">
+                <button type="button" id="registerBtn">Registrar</button>
+                <button type="button" id="loginBtn">Entrar</button>
+            </div>
+            <button type="button" id="forgotPasswordBtn" class="forgot-password">Esqueci minha senha?</button>
+            <p id="auth-message" class="auth-message">Nenhum usuário autenticado</p>
+            <p class="slogan"><strong><em>"Pérola Rara, onde a arte se encontra com o amor em cada detalhe".</em></strong></p>
+        </div>
+    </div>
+    <!-- ==== FIM SEÇÃO - AUTENTICAÇÃO ==== -->
+
+    <div id="app-container" style="display: none;" class="container">  <!-- O container principal agora tem display: none inicialmente -->
+
+        <!-- ==== INÍCIO SEÇÃO - CABEÇALHO (COM BARRA SUPERIOR) ==== -->
+       <header>
+            <div class="top-bar">
+                <div class="top-bar-content">
+                    <div id="user-info" class="user-info"></div>
+                    <button type="button" id="logoutBtn" class="logout-button">Sair</button>
+                </div>
+            </div>
             <div class="logo-container">
                 <img src="./logo_perola_rara.png" alt="Logo Pérola Rara" id="logo">
             </div>
@@ -22,10 +56,10 @@
             <hr class="titulo">
             <nav>
                 <ul>
-                    <li><a href="#" onclick="mostrarPagina('form-orcamento')">Início</a></li>
-                    <li><a href="#" onclick="mostrarPagina('orcamentos-gerados'); mostrarOrcamentosGerados()">Orçamentos Gerados</a></li>
-                    <li><a href="#" onclick="mostrarPagina('lista-pedidos'); mostrarPedidosRealizados()">Pedidos Realizados</a></li>
-                    <li><a href="#" onclick="mostrarPagina('relatorio')">Relatório</a></li>
+                    <li><a href="#" data-pagina="form-orcamento">Início</a></li>
+                    <li><a href="#" data-pagina="orcamentos-gerados">Orçamentos Gerados</a></li>
+                    <li><a href="#" data-pagina="lista-pedidos">Pedidos Realizados</a></li>
+                    <li><a href="#" data-pagina="relatorio">Relatório</a></li>
                     <!-- REMOVIDO o link Limpar Página -->
                 </ul>
             </nav>
@@ -33,21 +67,8 @@
         </header>
         <!-- ==== FIM SEÇÃO - CABEÇALHO ==== -->
 
-        <!-- Seção de Autenticação (Inicialmente oculta) -->
-        <div id="authSection" style="display: none; text-align: center; margin-bottom: 20px;">
-            <input type="email" id="email" placeholder="Email" style="margin-bottom: 10px;">
-            <input type="password" id="password" placeholder="Senha" style="margin-bottom: 10px;">
-            <div>
-                <button id="btnRegister">Registrar</button>
-                <button id="btnLogin">Entrar</button>
-                <button id="btnLogout" style="display:none;">Sair</button>
-            </div>
-            <p id="authStatus">Nenhum usuário autenticado</p>
-            <hr>
-        </div>
-      
-      <!-- ==== Adicionado após Seção de Autenticação ==== -->
-        <div id="appContent" style="display: block;">
+      <!-- ==== Conteúdo da Aplicação (o restante do seu HTML original) ==== -->
+      <div id="appContent">  <!--  Essa div envolve *todo* o conteúdo, menos a autenticação. -->
 
         <!-- ==== INÍCIO SEÇÃO - FORMULÁRIO DE ORÇAMENTO ==== -->
         <section id="form-orcamento" class="pagina">
@@ -90,8 +111,8 @@
                         <input type="text" id="telefone" name="telefone" placeholder="Número de Telefone ou Celular">
                     </div>
                     <div class="form-group">
-                        <label for="email">E-mail:</label>
-                        <input type="email" id="email" name="email" placeholder="Endereço de E-mail">
+                        <label for="clienteEmail">E-mail:</label>
+                        <input type="email" id="clienteEmail" name="email" placeholder="Endereço de E-mail">
                     </div>
                 </div>
                 <div class="form-row">
@@ -108,7 +129,7 @@
                                 <th>Quantidade</th>
                                 <th>Descrição do Produto</th>
                                 <th>Valor Unit.</th>
-                                <th>Valor Total</th>
+                                <th>Valor Total do Produto</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -116,7 +137,7 @@
                             <!-- Linhas de produtos serão adicionadas aqui -->
                         </tbody>
                     </table>
-                    <button type="button" onclick="adicionarProduto()">Adicionar Produto</button>
+                    <button type="button" id="btnAddProdutoOrcamento">Adicionar Produto</button>
                 </div>
                 <hr class="final-tabela">
                 <div class="form-row">
@@ -131,17 +152,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="valorFrete">Valor do Frete (R$):</label>
-                        <input type="text" id="valorFrete" name="valorFrete" value="0,00" oninput="formatarEntradaMoeda(this)" onblur="atualizarTotais()">
+                        <input type="text" id="valorFrete" name="valorFrete" value="0,00">
                     </div>
                     <div class="form-group">
                         <label for="valorOrcamento">Valor do Orçamento (R$):</label>
-                        <input type="text" id="valorOrcamento" name="valorOrcamento" value="0,00" readonly>
+                        <input type="text" id="valorOrcamento" name="valorOrcamento" value="0,00" readonly class="campo-calculado">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="total">Total (R$):</label>
-                        <input type="text" id="total" name="total" value="0,00" readonly>
+                        <input type="text" id="total" name="total" value="0,00" readonly class="campo-calculado">
                     </div>
                 </div>
                 <div class="form-row">
@@ -150,8 +171,8 @@
                         <textarea id="observacoes" name="observacoes" rows="4"></textarea>
                     </div>
                 </div>
-                <button type="button" id="btnGerarOrcamento" onclick="gerarOrcamento()">Gerar Orçamento</button>
-                <button type="button" id="btnAtualizarOrcamento" onclick="atualizarOrcamento()" style="display: none;">Atualizar Orçamento</button>
+                <button type="button" id="btnGerarOrcamento">Gerar Orçamento</button>
+                <button type="button" id="btnAtualizarOrcamento" style="display: none;">Atualizar Orçamento</button>
             </form>
         </section>
         <!-- ==== FIM SEÇÃO - FORMULÁRIO DE ORÇAMENTO ==== -->
@@ -191,37 +212,37 @@
         <!-- ==== FIM SEÇÃO - ORÇAMENTOS GERADOS ==== -->
 
       <!-- ==== INÍCIO SEÇÃO - LISTA DE PEDIDOS ==== -->
-<section id="lista-pedidos" class="pagina" style="display:none;">
-    <h2>Pedidos Realizados</h2>
-    <div class="filtro-data">
-        <label for="filtroDataInicioPedido">Início:</label>
-        <input type="date" id="filtroDataInicioPedido">
-        <label for="filtroDataFimPedido">Fim:</label>
-        <input type="date" id="filtroDataFimPedido">
-        <label for="filtroNumeroPedido">Número:</label>
-        <input type="number" id="filtroNumeroPedido" placeholder="Número do Pedido">
-        <label for="filtroAnoPedido">Ano:</label>
-        <input type="number" id="filtroAnoPedido" placeholder="Ano do Pedido">
-        <label for="filtroClientePedido">Cliente:</label>
-        <input type="text" id="filtroClientePedido" placeholder="Parte do nome do Cliente">
-        <button type="button" onclick="filtrarPedidos()">Filtrar</button>
-    </div>
-    <table id="tabela-pedidos">
-        <thead>
-            <tr>
-                <th>Número</th>
-                <th>Data do Pedido</th>
-                <th>Cliente</th>
-                <th>Total</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Linhas de pedidos serão adicionadas aqui -->
-        </tbody>
-    </table>
-</section>
-<!-- ==== FIM SEÇÃO - LISTA DE PEDIDOS ==== -->
+        <section id="lista-pedidos" class="pagina" style="display:none;">
+            <h2>Pedidos Realizados</h2>
+            <div class="filtro-data">
+                <label for="filtroDataInicioPedido">Início:</label>
+                <input type="date" id="filtroDataInicioPedido">
+                <label for="filtroDataFimPedido">Fim:</label>
+                <input type="date" id="filtroDataFimPedido">
+                <label for="filtroNumeroPedido">Número:</label>
+                <input type="number" id="filtroNumeroPedido" placeholder="Número do Pedido">
+                <label for="filtroAnoPedido">Ano:</label>
+                <input type="number" id="filtroAnoPedido" placeholder="Ano do Pedido">
+                <label for="filtroClientePedido">Cliente:</label>
+                <input type="text" id="filtroClientePedido" placeholder="Parte do nome do Cliente">
+                <button type="button" onclick="filtrarPedidos()">Filtrar</button>
+            </div>
+            <table id="tabela-pedidos">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Data do Pedido</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Linhas de pedidos serão adicionadas aqui -->
+                </tbody>
+            </table>
+        </section>
+        <!-- ==== FIM SEÇÃO - LISTA DE PEDIDOS ==== -->
 
         <!-- ==== INÍCIO SEÇÃO - FORMULÁRIO DE EDIÇÃO DE PEDIDO ==== -->
         <section id="form-edicao-pedido" class="pagina" style="display:none;">
@@ -285,7 +306,7 @@
                             <!-- Linhas de produtos serão adicionadas aqui -->
                         </tbody>
                     </table>
-                    <button type="button" onclick="adicionarProdutoEdicao()">Adicionar Produto</button>
+                    <button type="button" id="btnAddProdutoEdicao">Adicionar Produto</button>
                 </div>
                 <hr class="final-tabela">
                 <div class="form-row">
@@ -337,7 +358,7 @@
                     <label for="observacoesEdicao">Observações:</label>
                     <textarea id="observacoesEdicao" name="observacoesEdicao" rows="4"></textarea>
                 </div>
-                <button type="button" onclick="atualizarPedido()">Salvar Alterações</button>
+                <button type="button" id="btnSalvarPedidoEdicao">Salvar Alterações</button>
             </form>
         </section>
         <!-- ==== FIM SEÇÃO - FORMULÁRIO DE EDIÇÃO DE PEDIDO ==== -->
@@ -361,7 +382,7 @@
 
         <!-- ==== REMOVIDA A SEÇÃO - IMPORTAR EXPORTAR ==== -->
 
-        <!-- ==== INÍCIO SEÇÃO - VISUALIZAR ORÇAMENTO ==== -->
+                <!-- ==== INÍCIO SEÇÃO - VISUALIZAR ORÇAMENTO ==== -->
         <section id="visualizar-orcamento" class="pagina" style="display:none;">
             <div class="header-orcamento">
                 <img src="./logo_perola_rara.png" alt="Logo Pérola Rara" id="logo-orcamento">
@@ -375,6 +396,6 @@
         </section>
         <!-- ==== FIM SEÇÃO - VISUALIZAR ORÇAMENTO ==== -->
         </div><!-- Fechamento da div appContent -->
-    </div>
+    </div> <!-- Fechamento da div app-container -->
 </body>
 </html>
