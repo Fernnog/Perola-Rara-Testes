@@ -53,7 +53,8 @@ let novoCustoIndiretoCounter = 0;
 let taxaCredito = { percentual: 5, incluir: false };
 let margemLucroPadrao = 50;
 let precificacoesGeradas = [];
-// let proximoNumeroPrecificacao = 1; // Comentado: Não é mais necessário como variável global
+// Removida a inicialização direta: let proximoNumeroPrecificacao = 1;
+let proximoNumeroPrecificacao; // Deixa a variável sem valor inicial
 let produtoEmEdicao = null;
 let usuarioLogado = null;
 let materialEmEdicao = null; // Variável para controlar a edição de materiais
@@ -1596,32 +1597,7 @@ function calcularTotalComTaxas(){
 // ==== FIM SEÇÃO - FUNÇÕES CÁLCULO DE PRECIFICAÇÃO ====
 
 // ==== INÍCIO SEÇÃO - FUNÇÕES PRECIFICAÇÕES GERADAS ====
-// NOVA FUNÇÃO: Obtém o próximo número de precificação para o ano corrente
-async function obterProximoNumeroPrecificacao(ano) {
-    try {
-        // Consulta todas as precificações do ano corrente, ordenadas por número decrescente
-        const q = query(
-            collection(db, "precificacoes-geradas"),
-            where("ano", "==", ano),
-            orderBy("numero", "desc")
-        );
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            // Se não houver precificações no ano corrente, começa com 1
-            return 1;
-        } else {
-            // Pega o maior número existente e incrementa
-            const ultimaPrecificacao = querySnapshot.docs[0].data();
-            return ultimaPrecificacao.numero + 1;
-        }
-    } catch (error) {
-        console.error("Erro ao obter próximo número de precificação:", error);
-        throw new Error("Não foi possível determinar o próximo número de precificação.");
-    }
-}
-
-// ALTERADA: Função para gerar a nota de precificação usando numeração dinâmica
+// MODIFICADA: gerarNotaPrecificacao (agora busca e incrementa proximoNumeroPrecificacao do Firebase)
 async function gerarNotaPrecificacao() {
     const nomeCliente = document.getElementById('nome-cliente').value || "Não informado";
     const produtoNome = document.getElementById('produto-pesquisa').value;
@@ -1664,11 +1640,33 @@ async function gerarNotaPrecificacao() {
     const agora = new Date();
     const ano = agora.getFullYear();
 
-    // Obtém o próximo número de precificação do Firebase
-    const numeroPrecificacao = await obterProximoNumeroPrecificacao(ano);
+    // ---  LÓGICA PARA OBTER E ATUALIZAR proximoNumeroPrecificacao  ---
+    try {
+        // 1. Tenta obter o número do documento 'configuracoes/numeracao'
+        const docRef = doc(db, "configuracoes", "numeracao");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            // 2. Se existir, usa o valor + 1
+            proximoNumeroPrecificacao = docSnap.data().proximoNumero + 1;
+        } else {
+            // 3. Se não existir, usa 1 (primeira vez)
+            proximoNumeroPrecificacao = 1;
+        }
+
+        // 4. Atualiza (ou cria) o documento com o NOVO valor
+        await setDoc(docRef, { proximoNumero: proximoNumeroPrecificacao });
+
+    } catch (error) {
+        console.error("Erro ao buscar/atualizar numeração:", error);
+        alert("Erro ao gerar número da precificação. Tente novamente.");
+        return; // Importante:  Sai da função se der erro.
+    }
+    // ---  FIM DA LÓGICA DE NUMERAÇÃO  ---
+
 
     const precificacao = {
-        numero: numeroPrecificacao,
+        numero: proximoNumeroPrecificacao, // Usa o valor correto
         ano: ano,
         cliente: nomeCliente,
         produto: produtoNome,
@@ -1676,6 +1674,7 @@ async function gerarNotaPrecificacao() {
         margem: margemLucro,
         total: totalFinal,
         totalComTaxas: totalComTaxas,
+
         custoMateriais: custoProduto,
         detalhesMateriais: detalhesMateriaisProduto,
         custoMaoDeObraBase: custoMaoDeObraDetalhe,
@@ -1688,15 +1687,14 @@ async function gerarNotaPrecificacao() {
         taxaCreditoValor: taxaCreditoValor
     };
 
+
     try {
-        const docRef = await addDoc(collection(db, "precificacoes-geradas"), precificacao);
-        precificacao.id = docRef.id; // Adiciona o ID ao objeto local
-        precificacoesGeradas.push(precificacao); // Adiciona ao array local
+        await addDoc(collection(db, "precificacoes-geradas"), precificacao);
+        precificacoesGeradas.push(precificacao); //Adicionado para incluir no array local
         atualizarTabelaPrecificacoesGeradas();
-        // Não precisa mais chamar salvarDados() aqui, pois proximoNumeroPrecificacao não é mais gerenciado localmente
+        salvarDados();
         alert('Nota de precificação gerada e salva no Firebase!');
 
-        // Limpa os campos após sucesso
         document.getElementById('nome-cliente').value = '';
         document.getElementById('produto-pesquisa').value = '';
         document.getElementById('horas-produto').value = '1';
@@ -1878,18 +1876,20 @@ function abrirPrecificacaoEmNovaJanela(precificacaoId) {
 // ==== FIM SEÇÃO - FUNÇÕES PRECIFICAÇÕES GERADAS ====
 
 // ==== INÍCIO SEÇÃO - FUNÇÕES DE SALVAR E CARREGAR DADOS ====
-function salvarDados() {
-    const dados = {
-        margemLucroPadrao,
-        taxaCredito
-        // Removido: proximoNumeroPrecificacao, pois agora é gerenciado pelo Firebase
-    };
-    localStorage.setItem('dadosPrecificacao', JSON.stringify(dados));
-}
-
-// ALTERADA: carregarDados - Remove o carregamento de proximoNumeroPrecificacao
+// MODIFICADA: carregarDados (agora carrega proximoNumeroPrecificacao do Firebase, e na ordem correta)
 async function carregarDados() {
     try {
+        // 1. Carrega a numeração PRIMEIRO
+        const docRef = doc(db, "configuracoes", "numeracao");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            proximoNumeroPrecificacao = docSnap.data().proximoNumero;
+        } else {
+            proximoNumeroPrecificacao = 1; // Valor inicial
+        }
+
+        // 2. Carrega mão de obra e taxa de crédito
         const maoDeObraDoc = await getDocs(collection(db, "configuracoes"));
         maoDeObraDoc.forEach(doc => {
             if(doc.id === 'maoDeObra'){
@@ -1900,7 +1900,7 @@ async function carregarDados() {
             }
         });
 
-        // Carrega custos indiretos *predefinidos* do Firestore
+        // 3. Carrega custos indiretos *predefinidos* do Firestore
         const custosPredefinidosSnapshot = await getDocs(collection(db, "custos-indiretos-predefinidos"));
         custosPredefinidosSnapshot.forEach(doc => {
             // Atualiza o array 'custosIndiretosPredefinidos' com os dados do Firestore.
@@ -1911,21 +1911,22 @@ async function carregarDados() {
             }
         });
 
-        // Carrega custos indiretos adicionais *e* o valorPorHora do Firestore.
+
+        // 4. Carrega custos indiretos adicionais *e* o valorPorHora do Firestore.
         const custosAdicionaisSnapshot = await getDocs(collection(db, "custos-indiretos-adicionais"));
         custosIndiretosAdicionais = []; // Limpa o array
         custosAdicionaisSnapshot.forEach(doc => {
             custosIndiretosAdicionais.push({ id: doc.id, ...doc.data() }); // Inclui valorPorHora
         });
 
-        // Atualiza as tabelas
+        // 5. Carrega materiais, produtos e precificações
         atualizarTabelaMateriaisInsumos();
         carregarCustosIndiretosPredefinidos(); // Carrega/preenche a lista
         atualizarTabelaCustosIndiretos(); // Usa os valores carregados (incluindo valorPorHora)
         atualizarTabelaProdutosCadastrados();
         atualizarTabelaPrecificacoesGeradas();
 
-        // Preenche os campos de mão de obra
+
         document.getElementById('salario-receber').value = maoDeObra.salario;
         document.getElementById('horas-trabalhadas').value = maoDeObra.horas;
         document.getElementById('incluir-ferias-13o-sim').checked = maoDeObra.incluirFerias13o;
@@ -1933,13 +1934,13 @@ async function carregarDados() {
         calcularValorHora();
         calcularCustoFerias13o();
 
-        // Carrega configurações do localStorage
+        // 6. Carrega dados do localStorage (se houver)
         const dadosSalvos = localStorage.getItem('dadosPrecificacao');
         if (dadosSalvos) {
             const dados = JSON.parse(dadosSalvos);
+             // Não precisa mais carregar proximoNumeroPrecificacao do localStorage
             margemLucroPadrao = typeof dados.margemLucroPadrao === 'number' ? dados.margemLucroPadrao : margemLucroPadrao;
             taxaCredito = dados.taxaCredito || taxaCredito;
-            // Removido: proximoNumeroPrecificacao, pois agora é gerenciado pelo Firebase
 
             document.getElementById('margem-lucro-final').value = margemLucroPadrao;
             document.getElementById('taxa-credito-percentual').value = taxaCredito.percentual;
@@ -1947,47 +1948,12 @@ async function carregarDados() {
             document.getElementById('incluir-taxa-credito-nao').checked = !taxaCredito.incluir;
         }
 
-        // Calcula custos *depois* de carregar tudo.
+        // 7. Calcula custos *depois* de carregar tudo.
         calcularCustos();
 
     } catch (error) {
         console.error("Erro ao carregar dados do Firebase:", error);
         alert("Erro ao carregar dados do Firebase. Verifique o console para mais detalhes.");
-    }
-}
-
-function limparPagina() {
-    if (confirm('Tem certeza que deseja limpar todos os dados LOCALMENTE (interface)? Os dados do Firebase NÃO serão apagados.')) {
-        localStorage.removeItem('dadosPrecificacao');
-
-        materiais = [];
-        custosIndiretosAdicionais = [];
-        custosIndiretosPredefinidos = JSON.parse(JSON.stringify(custosIndiretosPredefinidosBase)); // Reset para o valor base
-        produtos = [];
-        precificacoesGeradas = [];
-
-        atualizarTabelaMateriaisInsumos();
-        carregarCustosIndiretosPredefinidos(); // Recarrega a lista de custos
-        atualizarTabelaCustosIndiretos();
-        atualizarTabelaProdutosCadastrados();
-        atualizarTabelaPrecificacoesGeradas();
-
-        limparFormulario('form-materiais-insumos');
-        limparFormulario('form-mao-de-obra');
-        limparFormulario('form-produtos-cadastrados');
-        document.querySelector('#tabela-materiais-produto tbody').innerHTML = '';
-
-        document.getElementById('salario-receber').value = '';
-        document.getElementById('horas-trabalhadas').value = 220;
-        document.getElementById('incluir-ferias-13o-nao').checked = true;
-        calcularValorHora();
-        calcularCustoFerias13o();
-
-        document.getElementById('margem-lucro-final').value = margemLucroPadrao;
-        document.getElementById('taxa-credito-percentual').value = taxaCredito.percentual;
-        document.getElementById('incluir-taxa-credito-nao').checked = true;
-
-        calcularCustos();
     }
 }
 // ==== FIM SEÇÃO - FUNÇÕES DE SALVAR E CARREGAR DADOS ====
