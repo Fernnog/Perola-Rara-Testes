@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Alvos de Oração</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
+</head>
+<body>
+    <div class="login-container">
+        <img src="../images/logo.png" alt="Logo" class="logo">
+        <h1>Login</h1>
+        <form id="login-form">
+            <input type="email" id="email" placeholder="Seu e-mail" required>
+            <input type="password" id="password" placeholder="Senha" required>
+            <button type="submit" class="btn">Entrar</button>
+            <a href="#" id="forgot-password">Esqueceu a senha?</a>
+        </form>
+        <div id="message" class="message"></div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>
