@@ -1,0 +1,93 @@
+/* Importa a fonte (se não estiver sendo importada em styles.css) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
+body {
+    font-family: 'Playfair Display', serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+    margin: 0; /* Garante que não há margens extras */
+}
+
+.login-container {
+    background-color: #fff;
+    padding: 40px; /* Aumentei o padding */
+    border-radius: 10px; /* Bordas mais arredondadas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;  /* Responsivo */
+    max-width: 400px; /* Largura máxima */
+}
+
+.logo {
+    max-width: 150px; /* Ajuste para o tamanho do logo */
+    margin-bottom: 30px; /* Espaço abaixo do logo */
+    height: auto; /* Mantém a proporção */
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+}
+
+input[type="email"],
+input[type="password"] {
+    display: block;
+    width: calc(100% - 20px); /* Ajuste para considerar o padding */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #e29420;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #ca7d1b;
+}
+
+#forgot-password {
+    display: block;
+    margin-top: 15px;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+#forgot-password:hover {
+    text-decoration: underline;
+}
+
+.message {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
